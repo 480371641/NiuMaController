@@ -1,0 +1,4 @@
+name: NiuMaManager
+version: '1.0-SNAPSHOT'
+main: mainFesht3.niuMaManager.NiuMaManager
+api-version: '1.20'
