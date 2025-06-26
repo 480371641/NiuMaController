@@ -1,26 +1,44 @@
 package mainFesht3.niuMaManager;
+import mainFesht3.niuMaManager.Utils.httpClient;
 import org.bukkit.Bukkit ;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import java.util.Map;
 import java.util.HashMap;
-
+import java.time.Instant;
+import  org.bukkit.ChatColor;
 
 public class EventListener implements Listener {
+    NiuMaManager nmm ;
+    public  EventListener (NiuMaManager nmm){
+        this.nmm = nmm;
+    }
+    public  EventListener (){}
 
     public String getDefaultGroup(String name ){
         return "default";
     }
+    public long getTime(){
+        return  Instant.now().toEpochMilli();
+//        System.out.println("毫秒级时间戳: " + timestampMillis);
+    }
+
+
+//    @EventHandler
+//    public void onTick() {
+//        ChatColor.BOLD 加粗
+//    }
+
 
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player p = event.getPlayer();
-        event.setJoinMessage("[NMManager]欢迎 " + p.getName() + " 进入服务器！");
+        nmm.randomtTpTime.put(p.getName() , 0.0);//add map
+        event.setJoinMessage(ChatColor.GREEN +"[NMManager]"+ChatColor.RESET+" 欢迎 " + p.getName() + " 进入服务器！");
         String[] s={"user" , p.getName() , "parent" , "add" , getDefaultGroup(p.getName())};
         NiuMaManager.runStaticCmd("lp" ,s );
 //        p.getUniqueId();

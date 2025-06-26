@@ -1,4 +1,4 @@
-package mainFesht3.niuMaManager;
+package mainFesht3.niuMaManager.Utils;
 
 import java.net.HttpURLConnection;
 import java.net.URL;

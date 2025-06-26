@@ -5,16 +5,32 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import org.bukkit.command.CommandSender;
-import com.google.gson.Gson;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public final class NiuMaManager extends JavaPlugin {
+    int tick = 0;
+    Map<String, Double> randomtTpTime = new ConcurrentHashMap<>();;
+
+    public void setRTT(String name , double time){
+        randomtTpTime.put(name , time);
+    }
+    public Double getRTT(String name){
+        if (randomtTpTime.get(name) != null ){
+            return randomtTpTime.get(name);
+        }else {
+            return 0.0;
+        }
+    }
 
     @Override
     public void onEnable() {
         // Plugin startup logic
         getLogger().info("插件已启用！"); // 服务器启动时执行
-        getServer().getPluginManager().registerEvents(new EventListener(), this);
+        getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        getCommand("randomtp").setExecutor(new RandomTp(this));
 
     }
 
