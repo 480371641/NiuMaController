@@ -2,10 +2,24 @@ name: NiuMaManager
 version: '1.0-SNAPSHOT'
 main: mainFesht3.niuMaManager.NiuMaManager
 api-version: '1.20'
+
+permissions:
+  NiuMaManager.user:
+    description: 基础用户权限组
+    default: true
+    children:
+      NiuMaManager.randomtp: true  # 子权限继承
+      NiuMaManager.vault.nmb: true
+
 commands:
   randomtp:
     description: 随机tp
     usage: /randomtp [help/do]
     permission: NiuMaManager.randomtp
     permission-message: 你没有使用此指令的权限
-    visible: true  # 强制命令在 TAB 补全中显示
+
+  nmb:
+    description: 获取牛马币数据
+    usage: /nmb
+    permission: NiuMaManager.vault.nmb
+    permission-message: 你没有使用此指令的权限

@@ -32,7 +32,7 @@ public class RandomTp implements CommandExecutor {
     }
 
     public double getTime(){
-        return  Instant.now().toEpochMilli()/1000;
+        return  (double) Instant.now().toEpochMilli() /1000;
 //        System.out.println("毫秒级时间戳: " + timestampMillis);
     }
 

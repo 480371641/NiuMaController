@@ -21,8 +21,8 @@ public class EventListener implements Listener {
     public String getDefaultGroup(String name ){
         return "default";
     }
-    public long getTime(){
-        return  Instant.now().toEpochMilli();
+    public double getTime(){
+        return  (double) Instant.now().toEpochMilli() /1000;
 //        System.out.println("毫秒级时间戳: " + timestampMillis);
     }
 
