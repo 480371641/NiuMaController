@@ -26,6 +26,7 @@ public class NMB implements CommandExecutor {
 
             // 获取玩家余额并格式化
             double balance = econ.getBalance(player);
+
             String formattedBalance = econ.format(balance); // 自动适配货币单位（如$、€等）
 
             // 返回结果
