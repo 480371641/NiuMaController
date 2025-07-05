@@ -62,7 +62,7 @@ public class RandomTp implements CommandExecutor {
                         //找到最近的非空气方块
                         p.sendMessage(ChatColor.GREEN + "已传送成功！");
                         p.sendTitle(ChatColor.GREEN + "" + ChatColor.BOLD + "传送成功！", ChatColor.GREEN + "...您已到站...", 10, 80, 10);
-                        newPos.setY(j+1);
+                        newPos.setY(j+2);
                         p.teleport(newPos);
                         waitingPlayerList = removeArrayValue(waitingPlayerList, i);
                     }

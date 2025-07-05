@@ -20,6 +20,6 @@ commands:
 
   nmb:
     description: 获取牛马币数据
-    usage: /nmb
+    usage: /nmb [bind/shop]
     permission: NiuMaManager.vault.nmb
     permission-message: 你没有使用此指令的权限

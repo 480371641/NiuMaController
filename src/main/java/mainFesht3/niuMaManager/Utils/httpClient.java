@@ -39,7 +39,7 @@ public class httpClient {
 
             // 获取响应码
             int responseCode = connection.getResponseCode();
-            System.out.println("响应码: " + responseCode);
+//            System.out.println("响应码: " + responseCode);
 
             // 读取响应数据
             StringBuilder response = new StringBuilder();
@@ -52,7 +52,7 @@ public class httpClient {
             }
 
             String res = response.toString();
-            System.out.println("响应数据: " + res);
+//            System.out.println("响应数据: " + res);
             return res;
         } catch (Exception e) {
             e.printStackTrace();
