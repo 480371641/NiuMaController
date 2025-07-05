@@ -1,1 +1,1 @@
-原为NiuMaManager,MCJAVA服务器自主开发的集成管理插件，也是我第一个java插件。仅供学习用途。
+原为NiuMaManager,为MCJAVA服务器自主开发的集成管理插件，也是我第一个java插件。仅供学习用途。
