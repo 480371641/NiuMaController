@@ -28,6 +28,15 @@ public class NMB implements CommandExecutor {
             sender.sendMessage("该命令仅玩家可使用");
             return true;
         }
+
+        if(args.length==3){
+            Player player = (Player) sender;
+            if(Objects.equals(args[0], "buy")){
+                shopProgress sp = new shopProgress(player,args[1],Integer.valueOf(args[2]));
+                sp.buy();
+            }
+        }
+
         if(args.length == 2){
             Player player = (Player) sender;
             if(Objects.equals(args[0], "bind")){
@@ -35,8 +44,9 @@ public class NMB implements CommandExecutor {
 
                 Map<String, String> params = new HashMap<>();
                 params.put("type" , "set_account");
-                params.put("name" , NiuMaManager.getPlayerNiuMaServerAccount(player));
+                params.put("name" , player.getName());
                 params.put("type2",args[1]);
+                params.put("type3" , NiuMaManager.getPlayerNiuMaServerAccount(player));//ACCOUNT
                 JsonObject obj = gson.fromJson(hc.get(params) , JsonObject.class);
                 if(obj.get("result").getAsBoolean()){
                     player.sendMessage("§a已成功绑定您的账号" + args[1]);
@@ -46,6 +56,12 @@ public class NMB implements CommandExecutor {
 
             }
         }
+        if(args.length == 1){
+            if(Objects.equals(args[0], "shop")) {
+
+            }
+        }
+
         if(args.length == 0){
             Player player = (Player) sender;
 //            Economy econ = NiuMaManager.getEconomy();

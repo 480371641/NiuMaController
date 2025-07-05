@@ -3,6 +3,7 @@ package mainFesht3.niuMaManager;
 import com.google.gson.Gson;
 import mainFesht3.niuMaManager.Utils.httpClient;
 import mainFesht3.niuMaManager.Vault.NMB;
+import mainFesht3.niuMaManager.Vault.NMBCommandTab;
 import mainFesht3.niuMaManager.qqBot.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -69,6 +70,9 @@ public final class NiuMaManager extends JavaPlugin {
         }
         // 注册命令处理器
         getCommand("nmb").setExecutor(new NMB(this));
+        // 注册命令补全器
+        getCommand("nmb").setTabCompleter(new NMBCommandTab());
+
 
         // 在异步线程中启动WebSocket服务器
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
