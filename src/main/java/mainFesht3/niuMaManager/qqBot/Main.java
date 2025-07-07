@@ -47,7 +47,7 @@ public class Main extends WebSocketServer {
         msg_s.put("message",msg);
         msg_s.put("group_id" , group_id);
         Map<String , Object> request = createApiPacket("send_group_msg" , msg_s);
-        plugin.getLogger().info("数据处理成功，准备返回: "+gs.toJson(request));
+//        plugin.getLogger().info("数据处理成功，准备返回: "+gs.toJson(request));
         broadcastStr(gs.toJson(request));
     }
 
@@ -73,7 +73,7 @@ public class Main extends WebSocketServer {
     public void onMessage(WebSocket conn, String message) {
         try{
             String clientId = conn.getRemoteSocketAddress().toString();
-            plugin.getLogger().info("收到消息 [" + clientId + "]: " + message);
+//            plugin.getLogger().info("收到消息 [" + clientId + "]: " + message);
             JsonObject obj = gs.fromJson(message , JsonObject.class);
 
             if(Objects.equals(obj.get("post_type").getAsString(), "message")) {
@@ -136,7 +136,7 @@ public class Main extends WebSocketServer {
                 client.send(message);
             }
         });
-        plugin.getLogger().info("发送"+message+"成功！！！！！！！！！！");
+//        plugin.getLogger().info("发送"+message+"成功！！！！！！！！！！");
     }
 
     /**

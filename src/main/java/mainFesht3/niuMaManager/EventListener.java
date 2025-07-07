@@ -6,6 +6,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+
+import java.net.http.HttpConnectTimeoutException;
 import java.util.Map;
 import java.util.HashMap;
 import java.time.Instant;
@@ -31,7 +34,31 @@ public class EventListener implements Listener {
 //    public void onTick() {
 //        ChatColor.BOLD 加粗
 //    }
+    httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
 
+    @EventHandler
+    public void onPlayerChat(AsyncPlayerChatEvent event){
+        try {
+            Player player = event.getPlayer();
+            String msg = event.getMessage();
+            Map<String, String> params = new HashMap<>();
+            params.put("account", NiuMaManager.getPlayerNiuMaServerAccount(player));
+            params.put("name" , player.getName());
+            params.put("type", "chat");
+            params.put("type2", msg);
+            String res = hc.get(params);
+            if(res.equals("cantchat")){
+                player.sendMessage("You have been baned!");
+            }else {
+                Bukkit.broadcastMessage(res);
+            }
+            event.setCancelled(true);//baned raw message
+        }catch (Exception e){
+            Bukkit.getLogger().info("errors from geting url :\n"+e);
+//            pass
+        }
+
+    }
 
 
     @EventHandler
@@ -41,7 +68,7 @@ public class EventListener implements Listener {
         event.setJoinMessage(ChatColor.GREEN +"[NMManager]"+ChatColor.RESET+" 欢迎 " + p.getName() + " 进入服务器！");
         String[] s={"user" , p.getName() , "parent" , "add" , getDefaultGroup(p.getName())};
         NiuMaManager.runStaticCmd("lp" ,s );
-        httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
+
         Map<String, String> params = new HashMap<>();
         params.put("name" , p.getName());
         params.put("type" , "checknmb");

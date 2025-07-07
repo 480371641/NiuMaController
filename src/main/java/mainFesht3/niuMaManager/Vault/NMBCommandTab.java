@@ -53,6 +53,7 @@ public class NMBCommandTab implements TabCompleter {
 //                    params.put("name" , NiuMaManager.getPlayerNiuMaServerAccount((Player) sender));//ACCOUNT
                     JsonArray jarr = gson.fromJson(hc.get(params) , JsonArray.class);
                     List<String> item_list = new ArrayList<>();
+//                    item_list.add("主手物品");
                     for(JsonElement ele : jarr){
                         JsonObject obj = ele.getAsJsonObject();
                         if(obj.get("canre").getAsBoolean()) {
@@ -62,8 +63,17 @@ public class NMBCommandTab implements TabCompleter {
 
                     completions.addAll(item_list);
                 }
-            }
 
+
+            }
+            if(args.length==3){//buy or re
+                if("buy".equalsIgnoreCase(args[0])){
+                    completions.addAll(Arrays.asList("1","64"));
+                }else if("re".equalsIgnoreCase(args[0])){
+                    completions.addAll(Arrays.asList("all"));
+                }
+
+            }
             // 根据用户已输入的内容筛选补全结果
             List<String> finalCompletions = new ArrayList<>();
             for (String completion : completions) {

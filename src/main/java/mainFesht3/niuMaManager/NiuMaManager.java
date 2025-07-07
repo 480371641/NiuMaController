@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import mainFesht3.niuMaManager.Utils.httpClient;
 import mainFesht3.niuMaManager.Vault.NMB;
 import mainFesht3.niuMaManager.Vault.NMBCommandTab;
+import mainFesht3.niuMaManager.Vault.Sidebar;
 import mainFesht3.niuMaManager.qqBot.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -21,6 +22,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.scheduler.BukkitTask;
 
 
+
 public final class NiuMaManager extends JavaPlugin {
     int tick = 0;
     Map<String, Double> randomtTpTime = new ConcurrentHashMap<>();
@@ -30,6 +32,7 @@ public final class NiuMaManager extends JavaPlugin {
     private int webSocketPort = 8080; // WebSocket服务器端口
     private Gson gson = new Gson();
     BukkitTask task; // 保存任务引用
+    BukkitTask sidebarTask;
 
     public void setRTT(String name , double time){
         randomtTpTime.put(name , time);
@@ -87,6 +90,9 @@ public final class NiuMaManager extends JavaPlugin {
             }
         });
         task = Bukkit.getScheduler().runTaskTimer(this, this::TTask , 0L , 30L);
+//        Sidebar sdb = new Sidebar();
+//        sidebarTask = Bukkit.getScheduler().runTaskTimer(this, sdb::updateEveryOnlinePlayerSidebar , 0L , 10L);
+//        失败的侧边栏，不搞了
     }
 
     @Override
@@ -112,9 +118,28 @@ public final class NiuMaManager extends JavaPlugin {
         return p.getName() + p.getUniqueId() ;
     }
 
+    public static int getPlayerNMB(Player p){
+        try {
+            httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
+            Map<String, String> params = new HashMap<>();
+            params.put("name", p.getName());
+            params.put("type", "checknmb");
+            params.put("name", NiuMaManager.getPlayerNiuMaServerAccount(p));
+//        Bukkit.getLogger().info("服务器输出数据：" + hc.get(params));
+            int res = Integer.parseInt(hc.get(params));
+            return  res;
+        }catch (Exception e){
+            return 0;
+        }
+    }
+
+
+
     Map<String, Double> online_player_time = new HashMap<>();
     httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
     double last_postTime = getTime();
+
+
     public void TTask(){
         double now_time = getTime();
         Collection<? extends Player> olp = Bukkit.getOnlinePlayers();
