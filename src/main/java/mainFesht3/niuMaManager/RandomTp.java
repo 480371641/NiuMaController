@@ -9,6 +9,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -60,6 +62,19 @@ public class RandomTp implements CommandExecutor {
     //                Bukkit.getLogger().info(""+block.getType());
                     if( !block.getType().isAir() ) {
                         //找到最近的非空气方块
+                        // 创建抗性6效果，持续30秒（600刻）
+                        PotionEffect resistance = new PotionEffect(
+                                PotionEffectType.DAMAGE_RESISTANCE, // 效果类型：抗性
+                                20 * 4,                                 // 持续时间（20刻=1秒）
+                                5,                                   // 等级（注意：等级0是效果I，所以5是效果VI）
+                                true,                               // 是否显示粒子效果
+                                true                                // 是否显示图标
+                        );
+
+                        // 应用效果
+                        p.addPotionEffect(resistance);
+
+
                         p.sendMessage(ChatColor.GREEN + "已传送成功！");
                         p.sendTitle(ChatColor.GREEN + "" + ChatColor.BOLD + "传送成功！", ChatColor.GREEN + "...您已到站...", 10, 80, 10);
                         newPos.setY(j+2);

@@ -1,5 +1,5 @@
 name: NiuMaManager
-version: '3.0'
+version: '3.5'
 main: mainFesht3.niuMaManager.NiuMaManager
 api-version: '1.20'
 
@@ -22,4 +22,10 @@ commands:
     description: 获取牛马币数据
     usage: /nmb [bind/shop]
     permission: NiuMaManager.vault.nmb
+    permission-message: 你没有使用此指令的权限
+
+  test:
+    description: 测试
+    usage: /test
+    permission: NiuMaManager.test
     permission-message: 你没有使用此指令的权限

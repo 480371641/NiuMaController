@@ -6,7 +6,7 @@ import mainFesht3.niuMaManager.Vault.NMB;
 import mainFesht3.niuMaManager.Vault.NMBCommandTab;
 import mainFesht3.niuMaManager.Vault.Sidebar;
 import mainFesht3.niuMaManager.qqBot.Main;
-import org.bukkit.Bukkit;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -77,6 +77,9 @@ public final class NiuMaManager extends JavaPlugin {
         getCommand("nmb").setTabCompleter(new NMBCommandTab());
 
 
+        getCommand("test").setExecutor(new Test());
+//        AETHER_INVISIBILITY_CLOAK
+
         // 在异步线程中启动WebSocket服务器
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
             try {
@@ -90,6 +93,7 @@ public final class NiuMaManager extends JavaPlugin {
             }
         });
         task = Bukkit.getScheduler().runTaskTimer(this, this::TTask , 0L , 30L);
+        sidebarTask = Bukkit.getScheduler().runTaskTimer(this, this::disableInvisiable , 0L , 1L);
 //        Sidebar sdb = new Sidebar();
 //        sidebarTask = Bukkit.getScheduler().runTaskTimer(this, sdb::updateEveryOnlinePlayerSidebar , 0L , 10L);
 //        失败的侧边栏，不搞了
@@ -134,6 +138,32 @@ public final class NiuMaManager extends JavaPlugin {
     }
 
 
+    public void disableInvisiable(){
+        Collection<? extends Player> olp = Bukkit.getOnlinePlayers();
+        //getLogger().info("test!!!!");
+        for(Player p : olp) {
+//            getLogger().info(String.valueOf(p.isInvisible()));
+            if (p.isInvisible() ){//&& !p.isOp()) {
+//                p.sendMessage("You has been appeared");
+                Location footpos = p.getLocation();
+
+                World wd = footpos.getWorld();
+                wd.spawnParticle(Particle.SOUL , p.getEyeLocation(),1);
+                wd.spawnParticle(Particle.GLOW ,
+                        footpos,//new Location(wd , footpos.getX() , footpos.getY()+1.6, footpos.getZ()) ,
+                        10 ,
+                        0.1,
+                        1.1,
+                        0.1,
+                        3);
+                p.sendTitle("" , ChatColor.RED+"服务器不建议您使用隐身哦！",0,10,0);
+//                p.setInvisible(false);
+//                getLogger().info(p.getName() + " try to be invisible !");
+            }
+        }
+    }
+
+
 
     Map<String, Double> online_player_time = new HashMap<>();
     httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
@@ -150,11 +180,13 @@ public final class NiuMaManager extends JavaPlugin {
 
         Map<String, Double> newmapOPT = new HashMap<>();
         for(Player p : olp){
+
             if(online_player_time.containsKey(p.getName())){
                 //在上次记录的ol玩家中，如果这次依旧在线，则增加游戏时长，在接口中待命
                 post_stss.put(NiuMaManager.getPlayerNiuMaServerAccount(p) , now_time - last_postTime);
             }
             newmapOPT.put(p.getName() , now_time);
+
         }
         online_player_time = newmapOPT;
         params.put("type2" ,gson.toJson(post_stss));
