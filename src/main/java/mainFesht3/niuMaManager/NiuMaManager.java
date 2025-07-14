@@ -1,6 +1,7 @@
 package mainFesht3.niuMaManager;
 
 import com.google.gson.Gson;
+import de.tr7zw.nbtapi.NBT;
 import mainFesht3.niuMaManager.Utils.httpClient;
 import mainFesht3.niuMaManager.Vault.NMB;
 import mainFesht3.niuMaManager.Vault.NMBCommandTab;
@@ -13,13 +14,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.command.CommandSender;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import net.milkbowl.vault.economy.Economy; // 此时应无报错
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 
 
 
@@ -71,6 +73,11 @@ public final class NiuMaManager extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        if (!NBT.preloadApi()) {
+            getLogger().warning("NBT-API wasn't initialized properly, disabling the plugin");
+            getPluginLoader().disablePlugin(this);
+            return;
+        }
         // 注册命令处理器
         getCommand("nmb").setExecutor(new NMB(this));
         // 注册命令补全器
@@ -94,6 +101,9 @@ public final class NiuMaManager extends JavaPlugin {
         });
         task = Bukkit.getScheduler().runTaskTimer(this, this::TTask , 0L , 30L);
         sidebarTask = Bukkit.getScheduler().runTaskTimer(this, this::disableInvisiable , 0L , 1L);
+
+//        EventListener el = new EventListener();
+//        Bukkit.getScheduler().runTaskTimer(this,this::dealSetVTask, 0L , 10L);
 //        Sidebar sdb = new Sidebar();
 //        sidebarTask = Bukkit.getScheduler().runTaskTimer(this, sdb::updateEveryOnlinePlayerSidebar , 0L , 10L);
 //        失败的侧边栏，不搞了
@@ -163,6 +173,66 @@ public final class NiuMaManager extends JavaPlugin {
         }
     }
 
+//
+//    List<List> tasks =  new CopyOnWriteArrayList<>();
+
+    public void setVauto(Player player , double adb){
+        if (player.isGliding()) {
+            // 玩家正在使用烟火火箭加速鞘翅飞行
+            player.sendMessage("已加速！");
+
+            // 在这里可以修改飞行速度
+            double nowv = player.getVelocity().length();
+            if(nowv<1){
+                nowv=1.51;
+            }
+            Vector v = player.getLocation().getDirection().multiply(nowv);
+//            double maxTime = getTime() + 1;
+//            BukkitTask bid = Bukkit.getScheduler().runTaskTimer(nmm,this::dealSetVTask, 0L , 1L);
+//            tasks.add(Arrays.asList(bid , maxTime , player));
+            player.setVelocity(v.multiply(adb)); // 设置更高的速度倍率
+        }
+    }
+//
+//    public void dealSetVTask(){
+//        for(List ls : tasks){
+//            double maxtime = (double) ls.get(0);
+////            BukkitTask bid = (BukkitTask) ls.get(0);
+//            if(getTime()>=maxtime){
+////                bid.cancel();
+//                tasks.remove(ls);
+//                Bukkit.getLogger().info(maxtime+" is cancelled");
+//            }else{
+//                try {
+//                    Collection<? extends Player> olp = Bukkit.getOnlinePlayers();
+//                    //getLogger().info("test!!!!");
+//                    Player player = (Player) ls.get(1);
+//                    for (Player p : olp) {
+//                        if (p.getUniqueId() == player.getUniqueId()) {
+//                            setVauto(p);
+//                        }
+//                    }
+//                }catch (Exception e){
+//                    Bukkit.getLogger().info(
+//                            e.getMessage()
+//                    );
+//                }
+//
+//            }
+//        }
+////        Collection<? extends Player> olp = Bukkit.getOnlinePlayers();
+////        //getLogger().info("test!!!!");
+////        for (Player p : olp) {
+////            if (p.isSneaking()) {
+////                setVauto(p);
+////            }
+////        }
+//    }
+//
+//    public void addATask(List lst){
+//        tasks.add(lst);
+//    }
+//
 
 
     Map<String, Double> online_player_time = new HashMap<>();

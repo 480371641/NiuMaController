@@ -1,18 +1,24 @@
 package mainFesht3.niuMaManager.Vault;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import mainFesht3.niuMaManager.NiuMaManager;
 import mainFesht3.niuMaManager.Utils.httpClient;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
+import de.tr7zw.nbtapi.NBTItem;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class shopProgress {
     //处理购买命令
@@ -20,6 +26,7 @@ public class shopProgress {
     Player player;
     String item_name;
     int num ;
+//    Gson gson = new Gson();
     public shopProgress(Player player , String item_name , int num){
         this.player = player;
         this.item_name = item_name;
@@ -59,6 +66,41 @@ public class shopProgress {
         return remaining;
     }
 
+    public ItemStack createSpecialItem(Material material , JsonObject nbt_meta){
+
+        ItemStack item = new ItemStack(material);
+
+        NBTItem nbt = new NBTItem(item);
+        nbt.setInteger("special_id",nbt_meta.get("special_id").getAsInt());
+        nbt.setString("special_type" , nbt_meta.get("special_type").getAsString());
+        item = nbt.getItem();
+
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(nbt_meta.get("displayName").getAsString());
+//
+        List<String> loreList = gson.fromJson(nbt_meta.get("lore").getAsJsonArray() , List.class);
+
+        meta.setLore(loreList);
+
+        JsonArray enchantList = nbt_meta.get("enchant").getAsJsonArray();
+        for(JsonElement endata : enchantList){
+            JsonArray ed = endata.getAsJsonArray();
+            NamespacedKey key = NamespacedKey.minecraft(ed.get(0).getAsString());
+            Enchantment enchantment = Enchantment.getByKey(key);
+            int level = ed.get(1).getAsInt();
+            meta.addEnchant(enchantment , level,true);
+
+        }
+
+//        // 方法 1：遍历转换（适合简单类型）
+//        List<String> stringList = new ArrayList<>();
+//        for (Object obj : rawList) {
+//            stringList.add(String.valueOf(obj)); // 确保 Object 可转为 String
+//        }
+        item.setItemMeta(meta);
+        return item;
+    }
+
 
     Gson gson = new Gson();
     httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
@@ -81,8 +123,8 @@ public class shopProgress {
                     player.sendMessage("§4你的存储空间不足！已为您自动调整数量为" + num + "个");
                 }
             } catch (Exception e) {
-                player.sendMessage("在处理您的命令时出现问题，请联系腐竹，异常如下：" + e);
-                return false;
+//                player.sendMessage("在处理您的命令时出现问题，请联系腐竹，异常如下：" + e);
+//                return false;
             }
         }
         params.put("type3" , ""+num);
@@ -98,8 +140,18 @@ public class shopProgress {
                 eco.depositPlayer(player , num*10.0d);
 
             }else {
-                Material ms = Material.valueOf(item_name.toUpperCase());
-                ItemStack newitem = new ItemStack(ms, num);
+                JsonObject raw_data = obj.get("raw").getAsJsonObject();
+                Material ms;
+                ItemStack newitem;
+//                Bukkit.getLogger().info(gson.toJson(raw_data));
+                if(raw_data.get("special").getAsBoolean()){
+
+                    ms = Material.valueOf(raw_data.get("item_type").getAsString().toUpperCase());
+                    newitem = createSpecialItem(ms,raw_data.getAsJsonObject("meta"));
+                }else {
+                    ms = Material.valueOf(item_name.toUpperCase());
+                    newitem = new ItemStack(ms, num);
+                }
                 int max = newitem.getMaxStackSize();
                 if (num > max) {
                     while (num / max > 0) {

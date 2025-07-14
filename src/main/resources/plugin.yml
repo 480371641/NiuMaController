@@ -7,21 +7,33 @@ permissions:
   NiuMaManager.user:
     description: 基础用户权限组
     default: true
-    children:
-      NiuMaManager.randomtp: true  # 子权限继承
-      NiuMaManager.vault.nmb: true
+#    children:
+#      NiuMaManager.randomtp: true  # 子权限继承
+
 
 commands:
   randomtp:
     description: 随机tp
     usage: /randomtp [help/do]
-    permission: NiuMaManager.randomtp
+    permission: NiuMaManager.user
     permission-message: 你没有使用此指令的权限
 
   nmb:
     description: 获取牛马币数据
     usage: /nmb [bind/shop]
-    permission: NiuMaManager.vault.nmb
+    permission: NiuMaManager.user
+    permission-message: 你没有使用此指令的权限
+
+  shop:
+    description: 获取牛马商店ui
+    usage: /shop
+    permission: NiuMaManager.user
+    permission-message: 你没有使用此指令的权限
+
+  exui:
+    description: 获取牛马回收商店ui
+    usage: /exui
+    permission: NiuMaManager.user
     permission-message: 你没有使用此指令的权限
 
   test:

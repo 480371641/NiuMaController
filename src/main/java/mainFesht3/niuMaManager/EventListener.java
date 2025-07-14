@@ -1,18 +1,27 @@
 package mainFesht3.niuMaManager;
+import de.tr7zw.nbtapi.NBTItem;
 import mainFesht3.niuMaManager.Utils.httpClient;
-import org.bukkit.Bukkit ;
+import org.bukkit.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import java.net.http.HttpConnectTimeoutException;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 import java.time.Instant;
-import  org.bukkit.ChatColor;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
+//import org.bukkit.
 
 public class EventListener implements Listener {
     NiuMaManager nmm ;
@@ -60,6 +69,47 @@ public class EventListener implements Listener {
 
     }
 
+
+    Map<String,Double> pls = new ConcurrentHashMap<>();
+    double cooldown = 3.5;
+    // 监听烟花火箭发射事件
+    @EventHandler
+    public void onFireworkLaunch(ProjectileLaunchEvent event) {
+        // 检查发射的实体是否为烟花火箭
+        if (event.getEntityType() == EntityType.FIREWORK) {
+            Entity firework = event.getEntity();
+            Player player = (Player) event.getEntity().getShooter();
+            ItemStack chestplate = player.getInventory().getChestplate();
+
+            NBTItem nbt = new NBTItem(chestplate);
+//            Bukkit.getLogger().info(nbt.getString("special_type"));
+//            Bukkit.getLogger().info(nbt.getInteger("special_id")+"");
+            // 检查物品是否为鞘翅
+            if (chestplate != null && chestplate.getType() == Material.ELYTRA && Objects.equals(nbt.getString("special_type"), "elytra")) {
+
+                Double last_atime = pls.get(player.getName());
+                if(last_atime==null) {
+                    pls.put(player.getName(), 0.0);
+                    last_atime = 0.0;
+                }
+                // 检查玩家是否正在使用鞘翅飞行
+                if (player.isGliding() && getTime() >last_atime) {
+                    // 玩家正在使用烟火火箭加速鞘翅飞行
+                    player.sendTitle("", ChatColor.BLUE+"使用技能加速飞行!冷却" + cooldown + "秒！" , 0 , 20 , 0);
+                    pls.put(player.getName(), getTime() + cooldown);
+                    // 在这里可以修改飞行速度
+    //                    Vector v = player.getVelocity();
+    //                    double maxTime = getTime() + 4.5;
+
+                    nmm.setVauto(player, 8.5);
+                    event.setCancelled(true);
+    //                    player.setVelocity(v.multiply(3.0)); // 设置更高的速度倍率
+                }
+
+            }
+        }
+
+    }
 
 
 
