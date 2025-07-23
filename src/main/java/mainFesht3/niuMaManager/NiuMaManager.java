@@ -1,12 +1,15 @@
 package mainFesht3.niuMaManager;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import de.tr7zw.nbtapi.NBT;
 import mainFesht3.niuMaManager.Utils.httpClient;
-import mainFesht3.niuMaManager.Vault.NMB;
-import mainFesht3.niuMaManager.Vault.NMBCommandTab;
-import mainFesht3.niuMaManager.Vault.Sidebar;
+import mainFesht3.niuMaManager.Vault.*;
 import mainFesht3.niuMaManager.qqBot.Main;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.EventBus;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,12 +19,12 @@ import org.bukkit.command.CommandSender;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import net.milkbowl.vault.economy.Economy; // 此时应无报错
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import com.mohistmc.forge.MohistEventBus;
 
 
 
@@ -85,6 +88,10 @@ public final class NiuMaManager extends JavaPlugin {
 
 
         getCommand("test").setExecutor(new Test());
+        getCommand("shop").setExecutor(new ShopGUI());
+        getCommand("exui").setExecutor(new ShopGUI());
+        // 注册事件监听器
+        getServer().getPluginManager().registerEvents(new GUIEvent(), this);
 //        AETHER_INVISIBILITY_CLOAK
 
         // 在异步线程中启动WebSocket服务器
@@ -101,6 +108,8 @@ public final class NiuMaManager extends JavaPlugin {
         });
         task = Bukkit.getScheduler().runTaskTimer(this, this::TTask , 0L , 30L);
         sidebarTask = Bukkit.getScheduler().runTaskTimer(this, this::disableInvisiable , 0L , 1L);
+        MohistEventBus.register((EventBus) MinecraftForge.EVENT_BUS,new ForgeEvent());
+
 
 //        EventListener el = new EventListener();
 //        Bukkit.getScheduler().runTaskTimer(this,this::dealSetVTask, 0L , 10L);
@@ -113,6 +122,16 @@ public final class NiuMaManager extends JavaPlugin {
     public void onDisable() {
         // Plugin shutdown logic
         task.cancel();
+        sidebarTask.cancel();
+        try {
+            qqbot_webSocketServer.stop();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        qqbot_webSocketServer = null;
+        econ = null;
+        randomtTpTime.clear();
+        online_player_time.clear();
     }
 
 
@@ -153,7 +172,7 @@ public final class NiuMaManager extends JavaPlugin {
         //getLogger().info("test!!!!");
         for(Player p : olp) {
 //            getLogger().info(String.valueOf(p.isInvisible()));
-            if (p.isInvisible() ){//&& !p.isOp()) {
+            if (p.isInvisible() && !p.isOp()) {
 //                p.sendMessage("You has been appeared");
                 Location footpos = p.getLocation();
 
@@ -240,6 +259,7 @@ public final class NiuMaManager extends JavaPlugin {
     double last_postTime = getTime();
 
 
+
     public void TTask(){
         double now_time = getTime();
         Collection<? extends Player> olp = Bukkit.getOnlinePlayers();
@@ -264,5 +284,36 @@ public final class NiuMaManager extends JavaPlugin {
         last_postTime = now_time;
 
 //        Bukkit.getLogger().info(gson.toJson(params));
+    }
+    public static JsonArray getData(){
+        Gson gson = new Gson();
+        httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
+        Map<String, String> params = new HashMap<>();
+        params.put("type" , "data");
+        JsonArray js = gson.fromJson(hc.get(params),JsonArray.class);
+        return js;
+    }
+    public static JsonArray getData(boolean canre){//仅获取可以回收的物品列表，此重载函数用于剥离不需要的元素
+        if(!canre){return null;}
+        JsonArray js = getData();
+        for(JsonElement ele : js){
+            JsonObject data = ele.getAsJsonObject();
+            if(!data.get("canre").getAsBoolean()){
+                js.remove(ele);
+            }
+        }
+        return js;
+    }
+    public static double getTax(){//此处获取的tax是直接用于乘售价的部分，并不需要1-
+        try {
+            httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
+            Map<String, String> params = new HashMap<>();
+            params.put("type", "get_tax");
+//        Bukkit.getLogger().info("服务器输出数据：" + hc.get(params));
+            //Integer.parseInt(hc.get(params));
+            return Double.parseDouble(hc.get(params));
+        }catch (Exception e){
+            return 0.1;
+        }
     }
 }

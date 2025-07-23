@@ -15,6 +15,7 @@ import java.util.*;
 public class NMBCommandTab implements TabCompleter {
         Gson gson = new Gson();
         httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
+
         @Override
         public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
             List<String> completions = new ArrayList<>();

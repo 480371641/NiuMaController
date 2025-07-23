@@ -2,6 +2,7 @@ package mainFesht3.niuMaManager.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,11 +15,26 @@ public class FastChestGUI {
     private final Map<Integer, ItemStack> items;  // 商店物品列表
     private  Inventory gui ;
 
-    public FastChestGUI(String title, int rows) {
+//    public FastChestGUI(String title, int rows) {
+//        this.title = title;
+//        this.size = rows * 9;
+//        this.items = new ConcurrentHashMap<>();
+//        createGUI();
+//    }
+    public FastChestGUI(String title , int allitems) {
         this.title = title;
+        int rows;
+        if(allitems%9==0){
+            rows = allitems/9;
+        }else{
+            rows = allitems/9 + 1;
+        }
+        if(rows > 6 ){//size max 54 rows max 6
+            rows = 6;
+        }
         this.size = rows * 9;
         this.items = new ConcurrentHashMap<>();
-        createGUI();
+//        createGUI();
     }
 
     // 添加物品到商店
@@ -27,8 +43,8 @@ public class FastChestGUI {
     }
 
     //create and save gui object
-    public void createGUI(){
-        Inventory inventory = Bukkit.createInventory(null, size, title);
+    public void createGUI(InventoryHolder owner){
+        Inventory inventory = Bukkit.createInventory(owner, size, title);
 
         // 填充商店物品
         // 使用 for-each 循环遍历 entrySet

@@ -114,7 +114,22 @@
             <layout>default</layout>
         </repository>
 
-
+        <repository>
+            <id>mohistmc</id>
+            <url>https://maven.mohistmc.com/</url>
+        </repository>
+        <!-- 添加CurseMaven仓库 -->
+        <repository>
+            <id>curse-maven</id>
+            <name>Curse Maven</name>
+            <url>https://www.cursemaven.com</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
 
 
     </repositories>
@@ -126,6 +141,14 @@
             <version>1.20.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.mohistmc</groupId>
+            <artifactId>mohistdev</artifactId>
+            <version>1.20.1</version>
+            <scope>compile</scope>
+        </dependency>
+
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -158,6 +181,14 @@
 <!--            <artifactId>tyrus-container-grizzly-server</artifactId>-->
 <!--            <version>2.1.1</version>-->
 <!--        </dependency>-->
+        <!-- 引入TACZ模组（对应版本 tacz-1.20.1-1.1.6-release） -->
+        <dependency>
+            <groupId>curse.maven</groupId>
+            <artifactId>timeless-and-classics-zero-1028108</artifactId>
+            <version>6632240</version>
+<!--            <classifier>deobf</classifier> &lt;!&ndash; 对应Forge的去混淆处理 &ndash;&gt;-->
+<!--            <scope>compile</scope>-->
+        </dependency>
     </dependencies>
 
 

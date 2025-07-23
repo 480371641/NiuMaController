@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.*;
 
 import de.tr7zw.nbtapi.NBTItem;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class shopProgress {
@@ -42,7 +43,15 @@ public class shopProgress {
     // 获取玩家物品栏中完全空的格子数量
     public static int getEmptySlots(Player player) {
         Inventory inventory = player.getInventory();
-        return inventory.firstEmpty(); // 返回第一个空槽的索引，如果没有则返回-1
+        ItemStack[] items = inventory.getStorageContents();
+        int empty = 0;
+        for(ItemStack item : items){
+            if (item == null || item.getType() == Material.AIR) {
+                empty++;
+            }
+        }
+//        player.sendMessage("你有"+empty+"个空槽位");
+        return empty; // 返回第一个空槽的索引，如果没有则返回-1
     }
     // 计算物品栏中指定物品的剩余可堆叠容量
     public static int getRemainingCapacity(Player player, ItemStack item) {
@@ -62,35 +71,59 @@ public class shopProgress {
         if (emptySlots > 0) {
             remaining += emptySlots * maxStackSize;
         }
-
+//        player.sendMessage("你有"+remaining+"个余量");
         return remaining;
     }
 
-    public ItemStack createSpecialItem(Material material , JsonObject nbt_meta){
-
+    public static ItemStack createSpecialItem(Material material , JsonObject nbt_meta){
+        Gson gson = new Gson();
         ItemStack item = new ItemStack(material);
 
-        NBTItem nbt = new NBTItem(item);
-        nbt.setInteger("special_id",nbt_meta.get("special_id").getAsInt());
-        nbt.setString("special_type" , nbt_meta.get("special_type").getAsString());
-        item = nbt.getItem();
+        if(nbt_meta.has("special_id")&&nbt_meta.has("special_type")) {
+            NBTItem nbt = new NBTItem(item);
+            nbt.setInteger("special_id", nbt_meta.get("special_id").getAsInt());
+            nbt.setString("special_type", nbt_meta.get("special_type").getAsString());
 
+            item = nbt.getItem();
+        }
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(nbt_meta.get("displayName").getAsString());
 //
-        List<String> loreList = gson.fromJson(nbt_meta.get("lore").getAsJsonArray() , List.class);
+        if(nbt_meta.has("lore")) {
+            List<String> loreList = gson.fromJson(nbt_meta.get("lore").getAsJsonArray(), List.class);
 
-        meta.setLore(loreList);
-
-        JsonArray enchantList = nbt_meta.get("enchant").getAsJsonArray();
-        for(JsonElement endata : enchantList){
-            JsonArray ed = endata.getAsJsonArray();
-            NamespacedKey key = NamespacedKey.minecraft(ed.get(0).getAsString());
-            Enchantment enchantment = Enchantment.getByKey(key);
-            int level = ed.get(1).getAsInt();
-            meta.addEnchant(enchantment , level,true);
-
+            meta.setLore(loreList);
         }
+
+        if(nbt_meta.has("StoredEnchantments")) {
+            JsonArray enchantList = nbt_meta.get("StoredEnchantments").getAsJsonArray();
+            if(item.getType() == Material.ENCHANTED_BOOK) {
+                EnchantmentStorageMeta esm = (EnchantmentStorageMeta) meta;
+                for (JsonElement endata : enchantList) {
+                    JsonArray ed = endata.getAsJsonArray();
+                    NamespacedKey key = NamespacedKey.minecraft(ed.get(0).getAsString());
+                    Enchantment enchantment = Enchantment.getByKey(key);
+                    int level = ed.get(1).getAsInt();
+                    esm.addStoredEnchant(enchantment,level,true);
+//                    meta.addEnchant(enchantment, level, true);
+
+                }
+            }
+        }
+
+        if(nbt_meta.has("Enchantments")) {
+            JsonArray enchantList = nbt_meta.get("Enchantments").getAsJsonArray();
+            for (JsonElement endata : enchantList) {
+                JsonArray ed = endata.getAsJsonArray();
+                NamespacedKey key = NamespacedKey.minecraft(ed.get(0).getAsString());
+                Enchantment enchantment = Enchantment.getByKey(key);
+                int level = ed.get(1).getAsInt();
+
+                meta.addEnchant(enchantment, level, true);
+
+            }
+        }
+
 
 //        // 方法 1：遍历转换（适合简单类型）
 //        List<String> stringList = new ArrayList<>();
@@ -117,10 +150,10 @@ public class shopProgress {
             try {
                 ItemStack item = new ItemStack(Material.valueOf(item_name.toUpperCase()));
                 int left = getRemainingCapacity(player, item);
-//            Bukkit.getLogger().info("left :==== "+left);
+            Bukkit.getLogger().info("num :==== "+num);
                 if (num > left) {
                     num = left;
-                    player.sendMessage("§4你的存储空间不足！已为您自动调整数量为" + num + "个");
+                    player.sendMessage("§4你的存储空间不足！已为您自动调整数量为" + left + "个");
                 }
             } catch (Exception e) {
 //                player.sendMessage("在处理您的命令时出现问题，请联系腐竹，异常如下：" + e);

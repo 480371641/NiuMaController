@@ -1,7 +1,15 @@
 package mainFesht3.niuMaManager;
+import com.mohistmc.api.event.BukkitHookForgeEvent;
+import com.mohistmc.forge.ForgeEventHandler;
+import de.tr7zw.nbtapi.NBT;
 import de.tr7zw.nbtapi.NBTItem;
 import mainFesht3.niuMaManager.Utils.httpClient;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.Event.Result;
+
 import org.bukkit.*;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -9,6 +17,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
+import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
@@ -18,7 +28,12 @@ import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.bukkit.event.server.ServerLoadEvent;
+import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 //import org.bukkit.
@@ -38,6 +53,65 @@ public class EventListener implements Listener {
 //        System.out.println("毫秒级时间戳: " + timestampMillis);
     }
 
+
+    @EventHandler
+    public void onServerDone(ServerLoadEvent event){
+        Bukkit.getLogger().info("start register Forge Event!!!!!!!!!!!!!!!!!!!!!!!!");
+        // 获取Forge的类加载器（负责加载模组类）
+        ClassLoader forgeClassLoader = MinecraftForge.class.getClassLoader();
+
+        try {
+            ForgeEvent listenerInstance = new ForgeEvent();
+            MinecraftForge.EVENT_BUS.register(listenerInstance);
+            Bukkit.getLogger().info("监听器已通过Forge类加载器注册");
+        } catch (Exception e) {
+            Bukkit.getLogger().severe("Forge类加载器注册失败：" + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
+    @EventHandler
+    public void onTest(BukkitHookForgeEvent event) {
+
+        if(event.getEventName().equals("GunShootEvent")) {
+            Bukkit.getLogger().info(event.getEventName());
+            Bukkit.getLogger().info("shoot!!");
+//            event.getEvent().setCanceled(true);
+        }
+//        Result s = event.getEvent().getResult();
+//        Bukkit.getLogger().info(s.getShooter().getName());
+//        event.getPlayer().sendMessage(event.getEventName());
+    }
+
+
+    @EventHandler
+    public void onAnvil(PrepareAnvilEvent event) {
+        try {
+            ItemStack result = event.getResult();  // 获取系统计算的初始输出
+            AnvilInventory anvilInv = event.getInventory();
+            ItemStack bookItem = anvilInv.getItem(1);
+            if (result != null  && bookItem != null) {
+                NBTItem nbt = new NBTItem(bookItem);
+                if("enchanted_book".equals(nbt.getString("special_type"))) {
+                    ItemMeta meta = result.getItemMeta();
+                    EnchantmentStorageMeta esm = (EnchantmentStorageMeta) bookItem.getItemMeta();
+                    Map<Enchantment, Integer> storedEnchants = esm.getStoredEnchants();
+                    for (Map.Entry<Enchantment, Integer> entry : storedEnchants.entrySet()) {
+                        Enchantment enchant = entry.getKey();
+                        int level = entry.getValue();
+                        meta.addEnchant(enchant, level, true); // 强制附加
+                    }
+
+                    result.setItemMeta(meta);
+
+                    event.setResult(result);  // 修改最终输出
+                }
+            }
+        }catch (Exception e){
+            event.setResult(null);
+        }
+    }
 
 //    @EventHandler
 //    public void onTick() {
