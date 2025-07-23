@@ -54,21 +54,21 @@ public class EventListener implements Listener {
     }
 
 
-    @EventHandler
-    public void onServerDone(ServerLoadEvent event){
-        Bukkit.getLogger().info("start register Forge Event!!!!!!!!!!!!!!!!!!!!!!!!");
-        // 获取Forge的类加载器（负责加载模组类）
-        ClassLoader forgeClassLoader = MinecraftForge.class.getClassLoader();
-
-        try {
-            ForgeEvent listenerInstance = new ForgeEvent();
-            MinecraftForge.EVENT_BUS.register(listenerInstance);
-            Bukkit.getLogger().info("监听器已通过Forge类加载器注册");
-        } catch (Exception e) {
-            Bukkit.getLogger().severe("Forge类加载器注册失败：" + e.getMessage());
-            e.printStackTrace();
-        }
-    }
+//    @EventHandler
+//    public void onServerDone(ServerLoadEvent event){
+//        Bukkit.getLogger().info("start register Forge Event!!!!!!!!!!!!!!!!!!!!!!!!");
+//        // 获取Forge的类加载器（负责加载模组类）
+//        ClassLoader forgeClassLoader = MinecraftForge.class.getClassLoader();
+//
+//        try {
+//            ForgeEvent listenerInstance = new ForgeEvent();
+//            MinecraftForge.EVENT_BUS.register(listenerInstance);
+//            Bukkit.getLogger().info("监听器已通过Forge类加载器注册");
+//        } catch (Exception e) {
+//            Bukkit.getLogger().severe("Forge类加载器注册失败：" + e.getMessage());
+//            e.printStackTrace();
+//        }
+//    }
 
 
     @EventHandler
