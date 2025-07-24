@@ -70,17 +70,19 @@ public class ForgeEvent {
 //                    0.1,
 //                    0.1,
 //                    0.001);
+        Location epos = entity.getLocation();
+        epos.setY( epos.getY() + entity.getHeight() - 0.15);
 
-        List<Location> sl = st.getShootLine(st.getPhasePos(0.4 , 0 ,2) , entity.getLocation() , 12);
+        List<Location> sl = st.getShootLine(st.getPhasePos(0.4 , 0 ,2) , epos , 12);
         for(Location pos : sl) {
 //            wd.spawnParticle(Particle.FLAME, pos, 1);
             wd.spawnParticle(Particle.SOUL_FIRE_FLAME,
                     pos,//new Location(wd , footpos.getX() , footpos.getY()+1.6, footpos.getZ()) ,
                     1 ,
-                    0.1,
-                    0.1,
-                    0.1,
-                    0.001);
+                    0,
+                    0,
+                    0,
+                    0.0001);
         }
     }
 
@@ -101,8 +103,9 @@ public class ForgeEvent {
 //                    0.1,
 //                    0.1,
 //                    0.001);
-
-        List<Location> sl = st.getShootLine(st.getPhasePos(0.4 , 0 ,2) , entity.getLocation() , 30);
+        Location epos = entity.getLocation();
+        epos.setY( epos.getY() + entity.getHeight() - 0.15);
+        List<Location> sl = st.getShootLine(st.getPhasePos(0.4 , 0 ,5.5) , epos  , 30);
         for(Location pos : sl) {
 //            wd.spawnParticle(Particle.FLAME, pos, 1);
             wd.spawnParticle(Particle.SONIC_BOOM,

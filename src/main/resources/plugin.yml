@@ -1,5 +1,5 @@
 name: NiuMaManager
-version: '3.5'
+version: '4.0'
 main: mainFesht3.niuMaManager.NiuMaManager
 api-version: '1.20'
 
