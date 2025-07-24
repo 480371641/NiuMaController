@@ -29,7 +29,10 @@ import com.mohistmc.forge.MohistEventBus;
 
 
 public final class NiuMaManager extends JavaPlugin {
-    int tick = 0;
+    double last_tick_time = 0;
+    static double tick_late = 100;//此项数值用于计算两tick间的延迟，以此计算瞬时tick值！
+    static JsonArray vip_player = new JsonArray();
+
     Map<String, Double> randomtTpTime = new ConcurrentHashMap<>();
     private static Economy econ;
 
@@ -37,7 +40,8 @@ public final class NiuMaManager extends JavaPlugin {
     private int webSocketPort = 8080; // WebSocket服务器端口
     private Gson gson = new Gson();
     BukkitTask task; // 保存任务引用
-    BukkitTask sidebarTask;
+    BukkitTask disableInvisiableTask;
+    BukkitTask tickCounterTask;
 
     public void setRTT(String name , double time){
         randomtTpTime.put(name , time);
@@ -106,9 +110,11 @@ public final class NiuMaManager extends JavaPlugin {
                 setEnabled(false); // 插件加载失败
             }
         });
-        task = Bukkit.getScheduler().runTaskTimer(this, this::TTask , 0L , 30L);
-        sidebarTask = Bukkit.getScheduler().runTaskTimer(this, this::disableInvisiable , 0L , 1L);
-        MohistEventBus.register((EventBus) MinecraftForge.EVENT_BUS,new ForgeEvent());
+        task = Bukkit.getScheduler().runTaskTimer(this, this::TTask , 0L , 60L);
+        disableInvisiableTask = Bukkit.getScheduler().runTaskTimer(this, this::disableInvisiable , 0L , 3L);
+        tickCounterTask = Bukkit.getScheduler().runTaskTimer(this, this::tickCounter , 0L , 1L);
+
+        MohistEventBus.register((EventBus) MinecraftForge.EVENT_BUS,new ForgeEvent());//!!!!!!!!!!!!!Main code!!!!!!!!!!!!!!!!!!!
 
 
 //        EventListener el = new EventListener();
@@ -122,7 +128,7 @@ public final class NiuMaManager extends JavaPlugin {
     public void onDisable() {
         // Plugin shutdown logic
         task.cancel();
-        sidebarTask.cancel();
+        disableInvisiableTask.cancel();
         try {
             qqbot_webSocketServer.stop();
         } catch (InterruptedException e) {
@@ -134,8 +140,32 @@ public final class NiuMaManager extends JavaPlugin {
         online_player_time.clear();
     }
 
+    public static double getTickLate(){
+        return tick_late;
+    }
 
+    public void tickCounter(){
+        double nowtime = getTime();
+        tick_late = nowtime - last_tick_time;
+        last_tick_time = nowtime;
+    }
 
+    public static JsonArray getVipList(){
+        Gson gson = new Gson();
+        httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
+        Map<String, String> params = new HashMap<>();
+        params.put("type", "viplist");
+        return gson.fromJson(hc.get(params), JsonArray.class);
+    }
+
+    public static boolean isVIP(Player player){
+        for(JsonElement ele : vip_player){
+            if( ele.getAsString().equals(NiuMaManager.getPlayerNiuMaServerAccount(player)) ){
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static boolean runStaticCmd(String cmd_start , String[] arg){
         String hcs = cmd_start ;
@@ -151,15 +181,23 @@ public final class NiuMaManager extends JavaPlugin {
         return p.getName() + p.getUniqueId() ;
     }
 
+    public static JsonObject getPlayerInfo(Player p){
+        Gson gson = new Gson();
+        httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
+        Map<String, String> params = new HashMap<>();
+        params.put("name", p.getName());
+        params.put("type", "player_info");
+        params.put("name", NiuMaManager.getPlayerNiuMaServerAccount(p));
+        JsonObject res = gson.fromJson(hc.get(params),JsonObject.class);
+        return res;
+    }
+
     public static int getPlayerNMB(Player p){
         try {
-            httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
-            Map<String, String> params = new HashMap<>();
-            params.put("name", p.getName());
-            params.put("type", "checknmb");
-            params.put("name", NiuMaManager.getPlayerNiuMaServerAccount(p));
+            JsonObject obj = getPlayerInfo(p);
+
 //        Bukkit.getLogger().info("服务器输出数据：" + hc.get(params));
-            int res = Integer.parseInt(hc.get(params));
+            int res = obj.get("nmb").getAsInt();
             return  res;
         }catch (Exception e){
             return 0;
@@ -276,12 +314,15 @@ public final class NiuMaManager extends JavaPlugin {
                 post_stss.put(NiuMaManager.getPlayerNiuMaServerAccount(p) , now_time - last_postTime);
             }
             newmapOPT.put(p.getName() , now_time);
-
         }
+
         online_player_time = newmapOPT;
         params.put("type2" ,gson.toJson(post_stss));
         hc.get(params);
         last_postTime = now_time;
+
+        vip_player = getVipList();
+
 
 //        Bukkit.getLogger().info(gson.toJson(params));
     }

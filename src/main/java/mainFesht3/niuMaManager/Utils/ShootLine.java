@@ -85,7 +85,7 @@ public class ShootLine {
      */
     public Location getPhasePos( double x, double y, double z) {
         // 计算水平旋转角（yaw），增加180 使向量指向玩家右侧方向，转换为弧度
-        Bukkit.getLogger().info(playerPos.getPitch()+"");
+//        Bukkit.getLogger().info(playerPos.getPitch()+"");
         double yaw =  Math.toRadians(playerPos.getYaw()+180);
         // 计算垂直旋转角（pitch），增加90度使向量指向玩家上侧方向，转换为弧度
         double pitch = Math.toRadians(-playerPos.getPitch()+90);

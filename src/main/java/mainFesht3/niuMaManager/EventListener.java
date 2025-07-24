@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
@@ -71,18 +72,18 @@ public class EventListener implements Listener {
 //    }
 
 
-    @EventHandler
-    public void onTest(BukkitHookForgeEvent event) {
-
-        if(event.getEventName().equals("GunShootEvent")) {
-            Bukkit.getLogger().info(event.getEventName());
-            Bukkit.getLogger().info("shoot!!");
-//            event.getEvent().setCanceled(true);
-        }
-//        Result s = event.getEvent().getResult();
-//        Bukkit.getLogger().info(s.getShooter().getName());
-//        event.getPlayer().sendMessage(event.getEventName());
-    }
+//    @EventHandler
+//    public void onTest(BukkitHookForgeEvent event) {
+//
+//        if(event.getEventName().equals("GunShootEvent")) {
+//            Bukkit.getLogger().info(event.getEventName());
+//            Bukkit.getLogger().info("shoot!!");
+////            event.getEvent().setCanceled(true);
+//        }
+////        Result s = event.getEvent().getResult();
+////        Bukkit.getLogger().info(s.getShooter().getName());
+////        event.getPlayer().sendMessage(event.getEventName());
+//    }
 
 
     @EventHandler
@@ -195,12 +196,19 @@ public class EventListener implements Listener {
         String[] s={"user" , p.getName() , "parent" , "add" , getDefaultGroup(p.getName())};
         NiuMaManager.runStaticCmd("lp" ,s );
 
-        Map<String, String> params = new HashMap<>();
-        params.put("name" , p.getName());
-        params.put("type" , "checknmb");
-        params.put("name" , NiuMaManager.getPlayerNiuMaServerAccount(p));
-//        Bukkit.getLogger().info("服务器输出数据：" + hc.get(params));
-        String res = hc.get(params);
+//        Map<String, String> params = new HashMap<>();
+//        params.put("name" , p.getName());
+//        params.put("type" , "checknmb");
+//        params.put("name" , NiuMaManager.getPlayerNiuMaServerAccount(p));
+////        Bukkit.getLogger().info("服务器输出数据：" + hc.get(params));
+//        String res = hc.get(params);
 //        Bukkit.broadcastMessage("juess");
     }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event){
+//        Player p = event.getPlayer();
+        event.setQuitMessage("有混蛋偷偷溜走了哦......");
+    }
+
 }

@@ -2,6 +2,7 @@ package mainFesht3.niuMaManager;
 
 
 import com.tacz.guns.api.event.common.EntityHurtByGunEvent;
+import com.tacz.guns.api.event.common.EntityKillByGunEvent;
 import mainFesht3.niuMaManager.Utils.ShootLine;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -24,27 +25,27 @@ public class ForgeEvent {
 
     @SubscribeEvent
     public void onShoot(GunShootEvent event){
-        LivingEntity entity = event.getShooter();
-        Player player = getPlayerFromUUID(entity.getBukkitLivingEntity().getUniqueId());
-//        NiuMaManager.runStaticCmd("say" , new String[]{p.getName() + "has just shoot"});
-
-
-        Bukkit.getLogger().info(player.getName() + "has just shoot");
-
-        World wd = player.getLocation().getWorld();
-        ShootLine st = new ShootLine(player.getEyeLocation());
-        wd.spawnParticle(Particle.FLAME,
-                    st.getPhasePos(1 , 0 ,1),
-                    1 ,
-                    0.1,
-                    0.1,
-                    0.1,
-                    0.001);
-
-//        List<Location> sl = st.getShootLine(st.getPhasePos(1 , 0 ,1) , st.getCenterPos(10) , 20);
+//        LivingEntity entity = event.getShooter();
+//        Player player = getPlayerFromUUID(entity.getBukkitLivingEntity().getUniqueId());
+////        NiuMaManager.runStaticCmd("say" , new String[]{p.getName() + "has just shoot"});
+//
+//
+////        Bukkit.getLogger().info(player.getName() + "has just shoot");
+//
+//        World wd = player.getLocation().getWorld();
+//        ShootLine st = new ShootLine(player.getEyeLocation());
+////        wd.spawnParticle(Particle.FLAME,
+////                    st.getPhasePos(0.4 , 0 ,1.5),
+////                    1 ,
+////                    0.1,
+////                    0.1,
+////                    0.1,
+////                    0.001);
+//
+//        List<Location> sl = st.getShootLine(st.getPhasePos(0.4 , 0 ,1.5) , st.getCenterPos(25) , 30);
 //        for(Location pos : sl) {
 ////            wd.spawnParticle(Particle.FLAME, pos, 1);
-//            wd.spawnParticle(Particle.FLAME,
+//            wd.spawnParticle(Particle.SONIC_BOOM,
 //                    pos,//new Location(wd , footpos.getX() , footpos.getY()+1.6, footpos.getZ()) ,
 //                    1 ,
 //                    0.1,
@@ -53,12 +54,66 @@ public class ForgeEvent {
 //                    0.001);
 //        }
     }
-
     @SubscribeEvent
     public void onHitEntity(EntityHurtByGunEvent event){
         Player player = getPlayerFromUUID(event.getAttacker().getBukkitLivingEntity().getUniqueId());
-        Entity bullet = Bukkit.getEntity(event.getBullet().getBukkitEntity().getUniqueId());
+        if(!NiuMaManager.isVIP(player)){return;}
+
+        Entity entity = Bukkit.getEntity(event.getHurtEntity().getBukkitEntity().getUniqueId());
 //        player.getLocation().getDirection();
+        World wd = player.getLocation().getWorld();
+        ShootLine st = new ShootLine(player.getEyeLocation());
+//        wd.spawnParticle(Particle.FLAME,
+//                    st.getPhasePos(0.4 , 0 ,1.5),
+//                    1 ,
+//                    0.1,
+//                    0.1,
+//                    0.1,
+//                    0.001);
+
+        List<Location> sl = st.getShootLine(st.getPhasePos(0.4 , 0 ,2) , entity.getLocation() , 12);
+        for(Location pos : sl) {
+//            wd.spawnParticle(Particle.FLAME, pos, 1);
+            wd.spawnParticle(Particle.SOUL_FIRE_FLAME,
+                    pos,//new Location(wd , footpos.getX() , footpos.getY()+1.6, footpos.getZ()) ,
+                    1 ,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.001);
+        }
+    }
+
+
+    @SubscribeEvent
+    public void onKillEntity(EntityKillByGunEvent event){
+        Player player = getPlayerFromUUID(event.getAttacker().getBukkitLivingEntity().getUniqueId());
+        if(!NiuMaManager.isVIP(player)){return;}
+
+        Entity entity = Bukkit.getEntity(event.getKilledEntity().getBukkitEntity().getUniqueId());
+//        player.getLocation().getDirection();
+        World wd = player.getLocation().getWorld();
+        ShootLine st = new ShootLine(player.getEyeLocation());
+//        wd.spawnParticle(Particle.FLAME,
+//                    st.getPhasePos(0.4 , 0 ,1.5),
+//                    1 ,
+//                    0.1,
+//                    0.1,
+//                    0.1,
+//                    0.001);
+
+        List<Location> sl = st.getShootLine(st.getPhasePos(0.4 , 0 ,2) , entity.getLocation() , 30);
+        for(Location pos : sl) {
+//            wd.spawnParticle(Particle.FLAME, pos, 1);
+            wd.spawnParticle(Particle.SONIC_BOOM,
+                    pos,//new Location(wd , footpos.getX() , footpos.getY()+1.6, footpos.getZ()) ,
+                    1 ,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.001);
+        }
+        wd.spawnParticle(Particle.EXPLOSION_LARGE ,entity.getLocation() ,1);
     }
 
     public Player getPlayerFromUUID(UUID uuid){return Bukkit.getPlayer(uuid);}

@@ -4,7 +4,10 @@ import java.io.IOException;
 
 
 import mainFesht3.niuMaManager.NiuMaManager;
+import net.minecraft.server.MinecraftServer;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
+import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.java_websocket.WebSocket;
@@ -50,6 +53,14 @@ public class Main extends WebSocketServer {
 //        plugin.getLogger().info("数据处理成功，准备返回: "+gs.toJson(request));
         broadcastStr(gs.toJson(request));
     }
+    private void sendPrivateMessage(long qq , String msg){
+        Map<String , Object> msg_s = new ConcurrentHashMap<>();
+        msg_s.put("message",msg);
+        msg_s.put("user_id" , qq);
+        Map<String , Object> request = createApiPacket("send_private_msg" , msg_s);
+//        plugin.getLogger().info("数据处理成功，准备返回: "+gs.toJson(request));
+        broadcastStr(gs.toJson(request));
+    }
 
 
     @Override
@@ -75,23 +86,31 @@ public class Main extends WebSocketServer {
             String clientId = conn.getRemoteSocketAddress().toString();
 //            plugin.getLogger().info("收到消息 [" + clientId + "]: " + message);
             JsonObject obj = gs.fromJson(message , JsonObject.class);
+            if(obj.has("post_type")){
+                if(Objects.equals(obj.get("post_type").getAsString(), "message")) {
+                    //message process
+                    String raw_msg = obj.get("raw_message").getAsString();
+                    switch (raw_msg) {
+                        case "在线":
+                                Collection<? extends Player> olp = Bukkit.getOnlinePlayers();
+                                String lname = "";
+                                for(Player p : olp){
+                                    lname += "\n";
+                                    if(NiuMaManager.isVIP(p)){
+                                        lname += "<VIP>";
+                                    }
+                                    lname+= p.getName();
+                                }
 
-            if(Objects.equals(obj.get("post_type").getAsString(), "message")) {
-                //message process
-                String raw_msg = obj.get("raw_message").getAsString();
-                switch (raw_msg) {
-                    case "在线":
-                        if (Objects.equals(obj.get("message_type").getAsString(), "group")) {
-                            long group_id = obj.get("group_id").getAsLong();
-                            Collection<? extends Player> olp = Bukkit.getOnlinePlayers();
-                            String lname = "";
-                            for(Player p : olp){
-                                lname+="\n"+p.getName();
-                            }
+                                sendMessage("当前在线人数：" + olp.size()+lname , obj);
+                            break;
+                        case "tps":
+                            double tick = 1/NiuMaManager.getTickLate();
+                            sendMessage( "Server Instantaneous TPS :" + (Math.round(tick*10)/10) +"\nAccording to tick delay." ,obj);
+                            break;
 
-                            sendGroupMessage(group_id, "当前在线人数：" + olp.size()+lname);
-                        }
-                        break;
+
+                    }
                 }
             }
         }catch(Exception e){
@@ -146,6 +165,23 @@ public class Main extends WebSocketServer {
         WebSocket client = clients.get(clientId);
         if (client != null && client.isOpen()) {
             client.send(message);
+        }
+    }
+
+    /**
+     *
+     * @param msg 要发送的信息字符串
+     * @param obj 附带整段的websocekt请求段，解析为jsonObject格式
+     */
+    public void sendMessage(String msg, JsonObject obj){
+        if ( obj.get("message_type").getAsString().equals("group") ) {
+            
+            long group_id = obj.get("group_id").getAsLong();
+            sendGroupMessage(group_id, msg);
+        } else if (obj.get("message_type").getAsString().equals("private")) {
+
+            long qq = obj.get("user_id").getAsLong();
+            sendPrivateMessage(qq, msg);
         }
     }
 }

@@ -117,10 +117,11 @@ public class RandomTp implements CommandExecutor {
 //                Bukkit.getLogger().info("End ::"+player.getName()+" "+nmm.getRTT(player.getName()) );
                 Location pos = player.getLocation();
                 Location newPos = new Location(player.getWorld(), pos.getX() + utls.randomDouble(-rand, rand), 1000.0, pos.getZ() + utls.randomDouble(-rand, rand));
-                player.teleport(newPos);
-
                 player.sendMessage(ChatColor.RED + "正在为您传送........");
                 player.sendTitle(ChatColor.DARK_BLUE + "===== 正在为您传送 =====", ChatColor.BLUE + "请勿做其他动作，已将您列入排列区", 10, 80, 10);
+
+                player.teleport(newPos);
+
                 waitingPlayerList = addArrayValue(waitingPlayerList , player);
 //              public abstract void sendTitle(
 //                    @Nullable String title,     // 主标题文本
