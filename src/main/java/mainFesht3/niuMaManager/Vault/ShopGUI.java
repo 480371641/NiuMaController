@@ -32,28 +32,34 @@ public class ShopGUI implements CommandExecutor {
         JsonArray data = NiuMaManager.getData();
         if(command.getName().equals("shop")) {
             gui = new FastChestGUI("§b§l牛马商店", data.size());
+            int shunxu = 0;
             for (int i = 0; i < data.size(); i++) {
                 JsonObject itemdata = data.get(i).getAsJsonObject();
                 ItemStack item;
                 try {
-                    if (itemdata.get("special").getAsBoolean()) {
-                        item = shopProgress.createSpecialItem(Material.valueOf(itemdata.get("item_type").getAsString().toUpperCase()), itemdata.getAsJsonObject("meta"));
-                    } else if (itemdata.get("item_name").getAsString().equals("nmc")) {
-                        item = new ItemStack(Material.valueOf(itemdata.get("item_type").getAsString().toUpperCase()));
-                    } else {
-                        item = new ItemStack(Material.valueOf(itemdata.get("item_name").getAsString().toUpperCase()));
-                    }
-                    ItemMeta meta = item.getItemMeta();
-                    List<String> newlist = new ArrayList<>(Arrays.asList("§g§l售价：" + itemdata.get("cost").getAsInt()));
-                    if (meta.getLore() != null) {
-                        newlist.addAll(meta.getLore());
-                    }
-                    newlist.add("" + i);
-                    meta.setLore(newlist);
-                    meta.setDisplayName(itemdata.get("name").getAsString());
+                    if(itemdata.has("onSell")&&itemdata.get("onSell").getAsBoolean()) {
+                        if (itemdata.get("special").getAsBoolean()) {
+                            ItemStack raw_item;
+                            raw_item = new ItemStack(Material.valueOf(itemdata.get("item_type").getAsString().toUpperCase()));
+                            item = shopProgress.createSpecialItem(raw_item, itemdata.getAsJsonObject("meta"));
+                        } else if (itemdata.get("item_name").getAsString().equals("nmc")) {
+                            item = new ItemStack(Material.valueOf(itemdata.get("item_type").getAsString().toUpperCase()));
+                        } else {
+                            item = new ItemStack(Material.valueOf(itemdata.get("item_name").getAsString().toUpperCase()));
+                        }
+                        ItemMeta meta = item.getItemMeta();
+                        List<String> newlist = new ArrayList<>(Arrays.asList("§g§l售价：" + itemdata.get("cost").getAsInt()));
+                        if (meta.getLore() != null) {
+                            newlist.addAll(meta.getLore());
+                        }
+                        newlist.add("" + i);
+                        meta.setLore(newlist);
+                        meta.setDisplayName(itemdata.get("name").getAsString());
 
-                    item.setItemMeta(meta);
-                    gui.addItem(i, item);
+                        item.setItemMeta(meta);
+                        gui.addItem(shunxu, item);
+                        shunxu++;
+                    }
                 } catch (Exception e) {
 //                pass
                     Bukkit.getLogger().info("wrong!!" + e);

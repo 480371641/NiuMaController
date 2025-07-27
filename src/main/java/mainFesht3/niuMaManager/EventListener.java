@@ -1,13 +1,11 @@
 package mainFesht3.niuMaManager;
-import com.mohistmc.api.event.BukkitHookForgeEvent;
-import com.mohistmc.forge.ForgeEventHandler;
 import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.nbtapi.NBTEntity;
 import de.tr7zw.nbtapi.NBTItem;
 import mainFesht3.niuMaManager.Utils.httpClient;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.Event.Result;
 
+import mainFesht3.niuMaManager.Vault.GUIEvent;
+import mainFesht3.niuMaManager.Vault.ShopGUI;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -16,6 +14,8 @@ import org.bukkit.entity.Player;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.player.PlayerEvent;
@@ -87,6 +87,43 @@ public class EventListener implements Listener {
 
 
     @EventHandler
+    public void onPlayerHurt(EntityDamageByEntityEvent event){
+        try {
+            Entity bullet = event.getDamager();
+            Entity entity = event.getEntity();
+//            Player player = (Player) attacker;
+
+//            Bukkit.getLogger().info(bullet.getName() + " cause "+event.getFinalDamage() + " to "+ entity.getName());
+//            player.sendMessage(attacker.getName() + " cause "+event.getFinalDamage() + " to "+ entity.getName());
+//            Bukkit.getLogger().info(event.getFinalDamage()+" ");
+            NBTEntity bulletnbt = new NBTEntity(bullet);
+
+            if((bullet.getType()+"").equals("TACZ_BULLET") ){
+                Player shooter = Bukkit.getPlayer(bulletnbt.getUUID("Owner"));
+//                shooter.sendMessage("You shoot at "+entity.getName());
+                ItemStack chestplate = shooter.getInventory().getChestplate();
+
+                NBTItem nbt = new NBTItem(chestplate);
+//            Bukkit.getLogger().info(nbt.getString("special_type"));
+//            Bukkit.getLogger().info(nbt.getInteger("special_id")+"");
+                // 检查物品是否为特殊物品
+                if (chestplate.getType() == Material.ELYTRA && Objects.equals(nbt.getString("special_type"), "chestplate")) {
+
+                }
+
+
+            }
+
+//            Bukkit.getLogger().info(nbt.getUUID("Owner").toString());
+//            Bukkit.getLogger().info(Bukkit.getPlayer("feSHt3").getUniqueId().toString());
+//            Bukkit.getPlayer("feSHt3").sendMessage(bullet.getType()+"");
+//            Bukkit.getLogger().info("  !!!!!!!!!!!!!!!!  ");
+        }catch (Exception e){
+            //pass
+        }
+    }
+
+    @EventHandler
     public void onAnvil(PrepareAnvilEvent event) {
         try {
             ItemStack result = event.getResult();  // 获取系统计算的初始输出
@@ -124,19 +161,21 @@ public class EventListener implements Listener {
     public void onPlayerChat(AsyncPlayerChatEvent event){
         try {
             Player player = event.getPlayer();
-            String msg = event.getMessage();
-            Map<String, String> params = new HashMap<>();
-            params.put("account", NiuMaManager.getPlayerNiuMaServerAccount(player));
-            params.put("name" , player.getName());
-            params.put("type", "chat");
-            params.put("type2", msg);
-            String res = hc.get(params);
-            if(res.equals("cantchat")){
-                player.sendMessage("You have been baned!");
-            }else {
-                Bukkit.broadcastMessage(res);
+            if( !GUIEvent.isOnInput(player) ) {// not on input
+                String msg = event.getMessage();
+                Map<String, String> params = new HashMap<>();
+                params.put("account", NiuMaManager.getPlayerNiuMaServerAccount(player));
+                params.put("name", player.getName());
+                params.put("type", "chat");
+                params.put("type2", msg);
+                String res = hc.get(params);
+                if (res.equals("cantchat")) {
+                    player.sendMessage("You have been baned!");
+                } else {
+                    Bukkit.broadcastMessage(res);
+                }
+                event.setCancelled(true);//baned raw message
             }
-            event.setCancelled(true);//baned raw message
         }catch (Exception e){
             Bukkit.getLogger().info("errors from geting url :\n"+e);
 //            pass
@@ -146,7 +185,7 @@ public class EventListener implements Listener {
 
 
     Map<String,Double> pls = new ConcurrentHashMap<>();
-    double cooldown = 3.5;
+    double cooldown = 7;
     // 监听烟花火箭发射事件
     @EventHandler
     public void onFireworkLaunch(ProjectileLaunchEvent event) {
@@ -176,7 +215,7 @@ public class EventListener implements Listener {
     //                    Vector v = player.getVelocity();
     //                    double maxTime = getTime() + 4.5;
 
-                    nmm.setVauto(player, 8.5);
+                    nmm.setVauto(player, 7.2);
                     event.setCancelled(true);
     //                    player.setVelocity(v.multiply(3.0)); // 设置更高的速度倍率
                 }
@@ -196,19 +235,19 @@ public class EventListener implements Listener {
         String[] s={"user" , p.getName() , "parent" , "add" , getDefaultGroup(p.getName())};
         NiuMaManager.runStaticCmd("lp" ,s );
 
-//        Map<String, String> params = new HashMap<>();
-//        params.put("name" , p.getName());
-//        params.put("type" , "checknmb");
-//        params.put("name" , NiuMaManager.getPlayerNiuMaServerAccount(p));
-////        Bukkit.getLogger().info("服务器输出数据：" + hc.get(params));
-//        String res = hc.get(params);
+        Map<String, String> params = new HashMap<>();
+        params.put("name" , p.getName());
+        params.put("type" , "checknmb");
+        params.put("name" , NiuMaManager.getPlayerNiuMaServerAccount(p));
+//        Bukkit.getLogger().info("服务器输出数据：" + hc.get(params));
+        String res = hc.get(params);
 //        Bukkit.broadcastMessage("juess");
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event){
 //        Player p = event.getPlayer();
-        event.setQuitMessage("有混蛋偷偷溜走了哦......");
+        event.setQuitMessage("有杂鱼偷偷溜走了喔......");
     }
 
 }

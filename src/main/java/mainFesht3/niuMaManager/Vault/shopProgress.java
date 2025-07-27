@@ -15,11 +15,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+
 
 public class shopProgress {
     //处理购买命令
@@ -75,9 +78,9 @@ public class shopProgress {
         return remaining;
     }
 
-    public static ItemStack createSpecialItem(Material material , JsonObject nbt_meta){
+    public static ItemStack createSpecialItem(ItemStack item , JsonObject nbt_meta){
         Gson gson = new Gson();
-        ItemStack item = new ItemStack(material);
+//        ItemStack item = new ItemStack(material);
 
         if(nbt_meta.has("special_id")&&nbt_meta.has("special_type")) {
             NBTItem nbt = new NBTItem(item);
@@ -135,6 +138,8 @@ public class shopProgress {
     }
 
 
+
+
     Gson gson = new Gson();
     httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
 
@@ -176,11 +181,11 @@ public class shopProgress {
                 JsonObject raw_data = obj.get("raw").getAsJsonObject();
                 Material ms;
                 ItemStack newitem;
+                ItemStack raw_item;
 //                Bukkit.getLogger().info(gson.toJson(raw_data));
                 if(raw_data.get("special").getAsBoolean()){
-
-                    ms = Material.valueOf(raw_data.get("item_type").getAsString().toUpperCase());
-                    newitem = createSpecialItem(ms,raw_data.getAsJsonObject("meta"));
+                    raw_item = new ItemStack( Material.getMaterial(raw_data.get("item_type").getAsString().toUpperCase()) );
+                    newitem = createSpecialItem(raw_item ,raw_data.getAsJsonObject("meta"));
                 }else {
                     ms = Material.valueOf(item_name.toUpperCase());
                     newitem = new ItemStack(ms, num);
@@ -188,11 +193,11 @@ public class shopProgress {
                 int max = newitem.getMaxStackSize();
                 if (num > max) {
                     while (num / max > 0) {
-                        newitem = new ItemStack(ms, max);
+                        newitem.setAmount(max);
                         player.getInventory().addItem(newitem);
                         num -= max;
                     }
-                    newitem = new ItemStack(ms, num);
+                    newitem.setAmount(num);
                     player.getInventory().addItem(newitem);
                 } else {
                     player.getInventory().addItem(newitem);

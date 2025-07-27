@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import com.google.gson.*;
-import org.bukkit.inventory.ItemStack;
+//import org.bukkit.inventory.ItemStack;
 
 //专门查询牛马币等操作
 public class NMB implements CommandExecutor {

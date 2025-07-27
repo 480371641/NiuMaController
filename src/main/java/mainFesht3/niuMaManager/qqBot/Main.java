@@ -4,10 +4,10 @@ import java.io.IOException;
 
 
 import mainFesht3.niuMaManager.NiuMaManager;
-import net.minecraft.server.MinecraftServer;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
-import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
+
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.java_websocket.WebSocket;

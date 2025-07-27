@@ -36,6 +36,13 @@ commands:
     permission: NiuMaManager.user
     permission-message: 你没有使用此指令的权限
 
+  zs:
+    description: 自杀
+    usage: /zs
+    permission: NiuMaManager.user
+    permission-message: 你没有使用此指令的权限
+
+
   test:
     description: 测试
     usage: /test

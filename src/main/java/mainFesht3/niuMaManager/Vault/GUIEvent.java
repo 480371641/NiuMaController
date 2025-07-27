@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class GUIEvent implements Listener {
 
-    List<Map<String, Object>> input_player = new ArrayList<>();
+    static List<Map<String, Object>>  input_player = new ArrayList<>();
     //{
     // "player" : player ,
     // "index" : dataindex
@@ -124,7 +124,7 @@ public class GUIEvent implements Listener {
         }
     }
 
-    public int getHasInputPlayer(Player player){
+    public static int getHasInputPlayer(Player player){
         for(int i = 0;i<input_player.size();i++){
             Map<String, Object> ip = input_player.get(i);
             Player player1 = (Player) ip.get("player");
@@ -133,5 +133,12 @@ public class GUIEvent implements Listener {
             }
         }
         return -1;
+    }
+
+    public static boolean isOnInput(Player player){
+        if(getHasInputPlayer(player) != -1){
+            return true;
+        }
+        return false;
     }
 }

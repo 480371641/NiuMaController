@@ -8,8 +8,6 @@ import de.tr7zw.nbtapi.NBT;
 import mainFesht3.niuMaManager.Utils.httpClient;
 import mainFesht3.niuMaManager.Vault.*;
 import mainFesht3.niuMaManager.qqBot.Main;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.EventBus;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,7 +22,6 @@ import net.milkbowl.vault.economy.Economy; // 此时应无报错
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
-import com.mohistmc.forge.MohistEventBus;
 
 
 
@@ -69,6 +66,9 @@ public final class NiuMaManager extends JavaPlugin {
 
     @Override
     public void onEnable() {
+
+
+
         // Plugin startup logic
         getLogger().info("插件已启用！"); // 服务器启动时执行
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
@@ -94,6 +94,8 @@ public final class NiuMaManager extends JavaPlugin {
         getCommand("test").setExecutor(new Test());
         getCommand("shop").setExecutor(new ShopGUI());
         getCommand("exui").setExecutor(new ShopGUI());
+
+        getCommand("zs").setExecutor(new killPlayerSelf());
         // 注册事件监听器
         getServer().getPluginManager().registerEvents(new GUIEvent(), this);
 //        AETHER_INVISIBILITY_CLOAK
@@ -114,7 +116,9 @@ public final class NiuMaManager extends JavaPlugin {
         disableInvisiableTask = Bukkit.getScheduler().runTaskTimer(this, this::disableInvisiable , 0L , 3L);
         tickCounterTask = Bukkit.getScheduler().runTaskTimer(this, this::tickCounter , 0L , 1L);
 
-        MohistEventBus.register((EventBus) MinecraftForge.EVENT_BUS,new ForgeEvent());//!!!!!!!!!!!!!Main code!!!!!!!!!!!!!!!!!!!
+
+//        registerForgeEvent(MinecraftForge.EVENT_BUS);
+//        MohistEventBus.register((EventBus) MinecraftForge.EVENT_BUS,new ForgeEvent());//!!!!!!!!!!!!!Main code!!!!!!!!!!!!!!!!!!!
 
 
 //        EventListener el = new EventListener();
@@ -126,18 +130,18 @@ public final class NiuMaManager extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
-        task.cancel();
-        disableInvisiableTask.cancel();
-        try {
-            qqbot_webSocketServer.stop();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        qqbot_webSocketServer = null;
-        econ = null;
-        randomtTpTime.clear();
-        online_player_time.clear();
+//        // Plugin shutdown logic
+//        task.cancel();
+//        disableInvisiableTask.cancel();
+//        try {
+//            qqbot_webSocketServer.stop();
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
+//        qqbot_webSocketServer = null;
+//        econ = null;
+//        randomtTpTime.clear();
+//        online_player_time.clear();
     }
 
     public static double getTickLate(){
