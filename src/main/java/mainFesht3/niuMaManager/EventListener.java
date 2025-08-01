@@ -94,7 +94,7 @@ public class EventListener implements Listener {
             NBTItem nbt = new NBTItem(chestplate);
             // 检查物品是否为鞘翅
             if (chestplate != null && chestplate.getType() == Material.ELYTRA && Objects.equals(nbt.getString("special_type"), "elytra")) {
-                if(event.getCause() == EntityDamageEvent.DamageCause.FALL || event.getCause() == EntityDamageEvent.DamageCause.FLY_INTO_WALL) {
+                if(event.getCause() == EntityDamageEvent.DamageCause.FALL || event.getCause() == EntityDamageEvent.DamageCause.FLY_INTO_WALL ) {
 
                     event.setDamage( event.getDamage()*0.2);
                     player.sendTitle("", ChatColor.DARK_BLUE+"自由之翼技能触发：摔落伤害减免80%" , 0 , 20 , 0);

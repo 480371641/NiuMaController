@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.tr7zw.nbtapi.NBT;
+import mainFesht3.niuMaManager.EquipmentPro.equipmentEventHandler;
 import mainFesht3.niuMaManager.Utils.httpClient;
 import mainFesht3.niuMaManager.Vault.*;
 import mainFesht3.niuMaManager.qqBot.Main;
@@ -76,6 +77,7 @@ public final class NiuMaManager extends JavaPlugin {
         // Plugin startup logic
         getLogger().info("插件已启用！"); // 服务器启动时执行
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        getServer().getPluginManager().registerEvents(new equipmentEventHandler(), this);
         getCommand("randomtp").setExecutor(new RandomTp(this));
 
         // 初始化Vault经济服务

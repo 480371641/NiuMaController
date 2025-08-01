@@ -108,9 +108,11 @@ public class equipmentAPI {
     public static JsonObject getGemShopData(int gem_id){
         JsonArray data = NiuMaManager.getData();
         for(JsonElement element : data){
-            if(element.getAsJsonObject().has("special")){
-                if(element.getAsJsonObject().has("special_id")){
-                    if(element.getAsJsonObject().get("special_id").getAsInt() == gem_id){
+            if(element.getAsJsonObject().has("special")&&element.getAsJsonObject().get("special").getAsBoolean()){
+                JsonObject meta = element.getAsJsonObject().getAsJsonObject("meta");
+//                Bukkit.getLogger().info(meta.toString());
+                if(meta.has("special_id")&&meta.has("special_type")){
+                    if(meta.get("special_id").getAsInt() == gem_id && meta.get("special_type").getAsString().equals("gem")){
                         return element.getAsJsonObject();
                     }
                 }
@@ -282,6 +284,100 @@ public class equipmentAPI {
 
 
         return item;
+    }
+
+
+
+    // 以下是获取装备的各性能数值（特殊）
+    //都需要为GemSpecial物品，唯一可使用的方法
+
+    /**
+     * 获取摔落伤害增值，0为原伤害，0.5等为伤害增加50% -0.5 为伤害减少50%
+     * @return
+     */
+    public double getFallDamageResisdent(){
+        double fallDamage = 0;
+        if(!isGemSpecial()){return fallDamage;}
+
+
+        List<Integer> gem_list = getGemList();
+        for(int gem_id : gem_list){
+            JsonObject gem_data = getGemData(gem_id);
+            JsonObject gem_special_data = gem_data.getAsJsonObject("data");//宝石专有属性数据
+            if(gem_special_data.has("fallDamage")) {
+                if(gem_data.get("only").getAsBoolean()){
+                    //该宝石的属性唯一，覆盖所有数据并停止读取宝石列表
+                    fallDamage = gem_special_data.get("fallDamage").getAsDouble();
+                    break;
+                }else {
+                    fallDamage += gem_special_data.get("fallDamage").getAsDouble();
+                }
+            }
+
+
+        }
+
+        return fallDamage;
+    }
+
+    /**
+     * 获取免疫火焰概率，0为无概率，0.5等为50%概率免疫
+     * @return
+     */
+    public double getAntiFirePercentage(){
+        double antiFire = 0;
+        if(!isGemSpecial()){return antiFire;}
+
+
+        List<Integer> gem_list = getGemList();
+        for(int gem_id : gem_list){
+            JsonObject gem_data = getGemData(gem_id);
+            JsonObject gem_special_data = gem_data.getAsJsonObject("data");//宝石专有属性数据
+            if(gem_special_data.has("antiFire")) {
+                if(gem_data.get("only").getAsBoolean()){
+                    //该宝石的属性唯一，覆盖所有数据并停止读取宝石列表
+                    antiFire = gem_special_data.get("antiFire").getAsDouble();
+                    break;
+                }else {
+                    antiFire += gem_special_data.get("antiFire").getAsDouble();
+                }
+            }
+
+
+        }
+
+        return antiFire;
+    }
+
+    /**
+     * 获取免疫火焰伤害，0为原伤害，0.5等为伤害增加50% -0.5 为伤害减少50%
+     * @return
+     */
+    public double getFireDamageResisdent(){
+        double fireDamage = 0;
+        if(!isGemSpecial()){return fireDamage;}
+
+
+        List<Integer> gem_list = getGemList();
+        for(int gem_id : gem_list){
+            JsonObject gem_data = getGemData(gem_id);
+            JsonObject gem_special_data = gem_data.getAsJsonObject("data");//宝石专有属性数据
+            if(gem_special_data.has("fireDamage")) {
+                if(gem_data.get("only").getAsBoolean()){
+                    //该宝石的属性唯一，覆盖所有数据并停止读取宝石列表
+                    fireDamage = gem_special_data.get("fireDamage").getAsDouble();
+                    break;
+                }else {
+                    //该宝石的属性不唯一，可以叠加
+                    fireDamage += gem_special_data.get("fireDamage").getAsDouble();
+                }
+
+            }
+
+
+        }
+
+        return fireDamage;
     }
 
 }

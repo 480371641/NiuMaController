@@ -98,12 +98,14 @@ public class NMB implements CommandExecutor {
                         JsonObject gemShopData = equipmentAPI.getGemShopData(gem_id);
                         ItemStack gem = shopProgress.createSpecialItem(new ItemStack(Material.valueOf(gemShopData.get("item_type").getAsString().toUpperCase())) ,gemShopData.getAsJsonObject("meta") );
 
-                        if(shopProgress.getItemNum(player,gem)>0){
+                        if(shopProgress.getItemNum(player,gem)>0 && !ep.isGem()){
                             gem.setAmount(1);
-                            player.getInventory().removeItem(gem);
-                            Bukkit.getLogger().info("add Gem result" + ep.addGem(gem_id) );
-                            shopProgress.replaceItemsInInventory(player.getInventory() , mainHandItem , ep.getFinalItem() );
-                            player.updateInventory();
+                            if(ep.addGem(gem_id)) {
+                                player.getInventory().removeItem(gem);
+//                                Bukkit.getLogger().info("add Gem result" + ep.addGem(gem_id));
+                                shopProgress.replaceItemsInInventory(player.getInventory(), mainHandItem, ep.getFinalItem());
+                                player.updateInventory();
+                            }
                         }
 
 //                        Bukkit.getLogger().info("add Gem result" + ep.addGem(gem_id) );
@@ -125,17 +127,18 @@ public class NMB implements CommandExecutor {
                         JsonObject gemShopData = equipmentAPI.getGemShopData(gem_id);
                         ItemStack gem = shopProgress.createSpecialItem(new ItemStack(Material.valueOf(gemShopData.get("item_type").getAsString().toUpperCase())) ,gemShopData.getAsJsonObject("meta") );
 
-                        if(shopProgress.getItemNum(player,gem)>0){
-                            if(shopProgress.getRemainingCapacity(player , gem) > 0) {
-                                gem.setAmount(1);
+                        if(shopProgress.getRemainingCapacity(player , gem) > 0 && !ep.isGem()) {
+                            gem.setAmount(1);
+
+                            if(ep.removeGem(gem_id)) {
                                 player.getInventory().addItem(gem);
-                                Bukkit.getLogger().info("remove Gem result" + ep.removeGem(gem_id));
+//                                Bukkit.getLogger().info("remove Gem result" + ep.removeGem(gem_id));
 
                                 shopProgress.replaceItemsInInventory(player.getInventory(), mainHandItem, ep.getFinalItem());
                                 player.updateInventory();
-                            }else {
-                                player.sendMessage(ChatColor.DARK_RED+"你的背包空间不够！不足以容纳褪下的强化宝石");
                             }
+                        }else {
+                            player.sendMessage(ChatColor.DARK_RED+"你的背包空间不够！不足以容纳褪下的强化宝石");
                         }
 
 
