@@ -1,5 +1,5 @@
 name: NiuMaManager
-version: '4.0'
+version: '4.1'
 main: mainFesht3.niuMaManager.NiuMaManager
 api-version: '1.20'
 
@@ -26,13 +26,13 @@ commands:
 
   shop:
     description: 获取牛马商店ui
-    usage: /shop
+    usage: /shop [1/2/3]
     permission: NiuMaManager.user
     permission-message: 你没有使用此指令的权限
 
   exui:
     description: 获取牛马回收商店ui
-    usage: /exui
+    usage: /exui [1/2/3]
     permission: NiuMaManager.user
     permission-message: 你没有使用此指令的权限
 
@@ -41,7 +41,6 @@ commands:
     usage: /zs
     permission: NiuMaManager.user
     permission-message: 你没有使用此指令的权限
-
 
   test:
     description: 测试

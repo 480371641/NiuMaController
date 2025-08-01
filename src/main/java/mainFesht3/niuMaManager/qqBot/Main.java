@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import mainFesht3.niuMaManager.NiuMaManager;
 
+import mainFesht3.niuMaManager.Utils.httpClient;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 
@@ -16,6 +17,7 @@ import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +33,7 @@ public class Main extends WebSocketServer {
     private final ConcurrentHashMap<String, WebSocket> clients = new ConcurrentHashMap<>();
 
     Gson gs = new Gson();
+    httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
 
     public Main(JavaPlugin plugin, int port) {
         super(new InetSocketAddress(port));
@@ -62,6 +65,10 @@ public class Main extends WebSocketServer {
         broadcastStr(gs.toJson(request));
     }
 
+//    private boolean cmdStart(String raw_str , String cmd){
+//        return raw_str.startsWith(cmd);
+//    }
+
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
@@ -90,6 +97,8 @@ public class Main extends WebSocketServer {
                 if(Objects.equals(obj.get("post_type").getAsString(), "message")) {
                     //message process
                     String raw_msg = obj.get("raw_message").getAsString();
+                    long qq = obj.get("user_id").getAsLong();
+                    Long group_id = obj.has("group_id") ? obj.get("group_id").getAsLong() : null ;
                     switch (raw_msg) {
                         case "在线":
                                 Collection<? extends Player> olp = Bukkit.getOnlinePlayers();
@@ -111,10 +120,31 @@ public class Main extends WebSocketServer {
 
 
                     }
+//                    Bukkit.getLogger().info(qq+" "+group_id);
+                    if(raw_msg.startsWith("说") && group_id == 750315622){
+                        JsonObject player_info = NiuMaManager.getPlayerInfo(qq);
+//                        Bukkit.getLogger().info(player_info.toString());
+                        if(player_info.get("exist").getAsBoolean()){
+                            Map<String, String> params = new HashMap<>();
+                            params.put("account", player_info.get("account").getAsString());
+                            params.put("name", player_info.get("name").getAsString());
+                            params.put("type", "chat");
+                            params.put("type2", raw_msg.replaceFirst("说" , ""));
+                            String res = hc.get(params);
+                            if (res.equals("cantchat")) {
+//                                player.sendMessage("You have been baned!");
+                                sendMessage("你的发言被服务器禁止",obj);
+                            } else {
+                                Bukkit.broadcastMessage("来自官方群聊的消息："+res);
+                            }
+                        }
+                    }
+
+
                 }
             }
         }catch(Exception e){
-            plugin.getLogger().info("遇到了一些问题，在解析"+message);
+            plugin.getLogger().info(e+"遇到了一些问题，在解析"+message);
         }
 
     }

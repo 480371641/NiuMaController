@@ -1,8 +1,10 @@
 package mainFesht3.niuMaManager.Vault;
 
 import mainFesht3.niuMaManager.NiuMaManager;
+import mainFesht3.niuMaManager.EquipmentPro.*;
 import mainFesht3.niuMaManager.Utils.httpClient;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -14,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import com.google.gson.*;
+import org.bukkit.inventory.ItemStack;
 //import org.bukkit.inventory.ItemStack;
 
 //专门查询牛马币等操作
@@ -25,6 +28,7 @@ public class NMB implements CommandExecutor {
         }
         Gson gson = new Gson();
         httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
+
         @Override
         public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
             if (!(sender instanceof Player)) {
@@ -33,6 +37,8 @@ public class NMB implements CommandExecutor {
             }
             //buy xxxx 1
             //0   1    2
+
+
             if(args.length==3){
                 Player player = (Player) sender;
                 if(Objects.equals(args[0], "buy")){
@@ -64,6 +70,7 @@ public class NMB implements CommandExecutor {
                 }
             }
 
+            //addGem gem_id //手持需要装配的装备
             if(args.length == 2){
                 Player player = (Player) sender;
                 if(Objects.equals(args[0], "bind")){
@@ -81,13 +88,67 @@ public class NMB implements CommandExecutor {
                         player.sendMessage("§4绑定您的账号时出现问题");
                     }
 
-                }
-            }
-            if(args.length == 1){
-                if(Objects.equals(args[0], "shop")) {
+                }else if (args[0].equals("addGem")) {
+                    //addGem ....
+                    try {
+                        ItemStack mainHandItem = player.getInventory().getItemInMainHand();
+                        int gem_id = Integer.parseInt(args[1]);
+                        equipmentAPI ep = new equipmentAPI(mainHandItem);
 
+                        JsonObject gemShopData = equipmentAPI.getGemShopData(gem_id);
+                        ItemStack gem = shopProgress.createSpecialItem(new ItemStack(Material.valueOf(gemShopData.get("item_type").getAsString().toUpperCase())) ,gemShopData.getAsJsonObject("meta") );
+
+                        if(shopProgress.getItemNum(player,gem)>0){
+                            gem.setAmount(1);
+                            player.getInventory().removeItem(gem);
+                            Bukkit.getLogger().info("add Gem result" + ep.addGem(gem_id) );
+                            shopProgress.replaceItemsInInventory(player.getInventory() , mainHandItem , ep.getFinalItem() );
+                            player.updateInventory();
+                        }
+
+//                        Bukkit.getLogger().info("add Gem result" + ep.addGem(gem_id) );
+
+
+                        player.performCommand("test");
+
+
+                    }catch (Exception e){
+                        Bukkit.getLogger().info("Exception : "+e);
+                    }
+                }else if (args[0].equals("removeGem")) {
+                    //addGem ....
+                    try {
+                        ItemStack mainHandItem = player.getInventory().getItemInMainHand();
+                        int gem_id = Integer.parseInt(args[1]);
+                        equipmentAPI ep = new equipmentAPI(mainHandItem);
+
+                        JsonObject gemShopData = equipmentAPI.getGemShopData(gem_id);
+                        ItemStack gem = shopProgress.createSpecialItem(new ItemStack(Material.valueOf(gemShopData.get("item_type").getAsString().toUpperCase())) ,gemShopData.getAsJsonObject("meta") );
+
+                        if(shopProgress.getItemNum(player,gem)>0){
+                            if(shopProgress.getRemainingCapacity(player , gem) > 0) {
+                                gem.setAmount(1);
+                                player.getInventory().addItem(gem);
+                                Bukkit.getLogger().info("remove Gem result" + ep.removeGem(gem_id));
+
+                                shopProgress.replaceItemsInInventory(player.getInventory(), mainHandItem, ep.getFinalItem());
+                                player.updateInventory();
+                            }else {
+                                player.sendMessage(ChatColor.DARK_RED+"你的背包空间不够！不足以容纳褪下的强化宝石");
+                            }
+                        }
+
+
+                    }catch (Exception e){
+                        Bukkit.getLogger().info("Exception : "+e);
+                    }
                 }
             }
+//            if(args.length == 1){
+//                if(Objects.equals(args[0], "shop")) {
+//
+//                }
+//            }
 
             if(args.length == 0){
                 Player player = (Player) sender;

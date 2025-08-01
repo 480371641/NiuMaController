@@ -1,13 +1,11 @@
 package mainFesht3.niuMaManager;
 
 import mainFesht3.niuMaManager.Utils.RandomUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -17,11 +15,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.lang.Object;
-import org.bukkit.Material;
+
 import org.bukkit.block.Block;
 
 public class RandomTp implements CommandExecutor {
-    double rand = 30000.0;
+    int rand = 30000;
     double cd = 60.0;
     NiuMaManager nmm ;
     BukkitTask task; // 保存任务引用
@@ -114,13 +112,47 @@ public class RandomTp implements CommandExecutor {
                     nmm.setRTT(player.getName(), getTime());
                     player.sendMessage(ChatColor.RED  + " 此功能进入60秒冷却时间");
                 }
+
 //                Bukkit.getLogger().info("End ::"+player.getName()+" "+nmm.getRTT(player.getName()) );
                 Location pos = player.getLocation();
-                Location newPos = new Location(player.getWorld(), pos.getX() + utls.randomDouble(-rand, rand), 1000.0, pos.getZ() + utls.randomDouble(-rand, rand));
+                Location newPos = new Location(player.getWorld(),pos.getX() + utls.randomInt(-rand, rand) , 1000.0, pos.getZ() + utls.randomDouble(-rand, rand));
                 player.sendMessage(ChatColor.RED + "正在为您传送........");
                 player.sendTitle(ChatColor.DARK_BLUE + "===== 正在为您传送 =====", ChatColor.BLUE + "请勿做其他动作，已将您列入排列区", 10, 80, 10);
 
                 player.teleport(newPos);
+//
+//                int chunkX = (int)(pos.getX() + utls.randomInt(-rand, rand)) >> 4;// = /16
+//                int chunkZ = (int)(pos.getZ() + utls.randomInt(-rand, rand)) >> 4;// = /16
+//                int loadRadius = 2;//预加载周围
+//                World world = pos.getWorld();;
+//                player.teleport(newPos);
+//                Bukkit.getScheduler().runTaskAsynchronously(nmm,()->{
+//                    try {
+//                        // 异步加载目标区块及周围区域
+//                        for (int x = chunkX - loadRadius; x <= chunkX + loadRadius; x++) {
+//                            for (int z = chunkZ - loadRadius; z <= chunkZ + loadRadius; z++) {
+//                                world.getChunkAt(x, z, true).load();
+//                            }
+//                        }
+//
+//                        // 区块加载完成后切回主线程传送
+//                        Bukkit.getScheduler().runTask(nmm, () -> {
+//                            // 二次验证区块是否加载
+//                            if (world.isChunkLoaded(chunkX, chunkZ)) {
+//                                player.teleport(findSafeLocation(randomLoc));
+//                                player.sendMessage("§a传送成功！");
+//                            } else {
+//                                player.sendMessage("§c区块加载失败，请重试");
+//                            }
+//                        });
+//                    } catch (Exception e) {
+//                        // 异常处理
+//                        player.sendMessage("§c传送过程中发生错误");
+//                        e.printStackTrace();
+//                    }
+//                });
+
+
 
                 waitingPlayerList = addArrayValue(waitingPlayerList , player);
 //              public abstract void sendTitle(

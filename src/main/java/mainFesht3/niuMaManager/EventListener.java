@@ -22,6 +22,7 @@ import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
+import java.net.PortUnreachableException;
 import java.net.http.HttpConnectTimeoutException;
 import java.util.*;
 import java.time.Instant;
@@ -84,10 +85,47 @@ public class EventListener implements Listener {
 ////        Bukkit.getLogger().info(s.getShooter().getName());
 ////        event.getPlayer().sendMessage(event.getEventName());
 //    }
+    @EventHandler
+    public void onFallDamage(EntityDamageEvent event){
+        try {
+            Player player = (Player) event.getEntity();
+            ItemStack chestplate = player.getInventory().getChestplate();
+
+            NBTItem nbt = new NBTItem(chestplate);
+            // 检查物品是否为鞘翅
+            if (chestplate != null && chestplate.getType() == Material.ELYTRA && Objects.equals(nbt.getString("special_type"), "elytra")) {
+                if(event.getCause() == EntityDamageEvent.DamageCause.FALL || event.getCause() == EntityDamageEvent.DamageCause.FLY_INTO_WALL) {
+
+                    event.setDamage( event.getDamage()*0.2);
+                    player.sendTitle("", ChatColor.DARK_BLUE+"自由之翼技能触发：摔落伤害减免80%" , 0 , 20 , 0);
+                    player.sendMessage("已减免"+(Math.round(event.getDamage()*0.8*100)/100)+"的伤害" );
+                }
+            }
+            }catch (Exception e){
+            //pass
+        }
+    }
+
 
 
     @EventHandler
-    public void onPlayerHurt(EntityDamageByEntityEvent event){
+    public void onEntityHurtAndBanNMGOLD(EntityDamageByEntityEvent event){
+        try {
+            Player player = (Player)event.getDamager();
+            ItemStack mainhand = player.getInventory().getItemInMainHand();
+            NBTItem nbt = new NBTItem(mainhand);
+            if(nbt.getString("special_type").equals("nmgold")){
+                event.setDamage(2);
+            }
+
+            }catch (Exception e){
+        //pass
+        }
+}
+
+
+    @EventHandler
+    public void onEntityHurt(EntityDamageByEntityEvent event){
         try {
             Entity bullet = event.getDamager();
             Entity entity = event.getEntity();

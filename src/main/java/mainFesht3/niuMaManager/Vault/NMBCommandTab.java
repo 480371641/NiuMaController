@@ -22,7 +22,7 @@ public class NMBCommandTab implements TabCompleter {
 
             // 当输入第一个参数时，提供补全选项
             if (args.length == 1) {
-                completions.addAll(Arrays.asList("bind", "shop","buy","re"));
+                completions.addAll(Arrays.asList("bind", "shop","buy","re","addGem","removeGem"));
             }
             // 当输入第二个参数时，根据情况提供补全选项
             else if (args.length == 2) {

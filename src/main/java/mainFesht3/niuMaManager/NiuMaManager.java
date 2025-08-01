@@ -28,7 +28,11 @@ import org.bukkit.util.Vector;
 public final class NiuMaManager extends JavaPlugin {
     double last_tick_time = 0;
     static double tick_late = 100;//此项数值用于计算两tick间的延迟，以此计算瞬时tick值！
+
     static JsonArray vip_player = new JsonArray();
+    static JsonArray gem_data = new JsonArray();
+    static JsonArray shopData = new JsonArray();
+    static JsonArray gemlegal = new JsonArray();
 
     Map<String, Double> randomtTpTime = new ConcurrentHashMap<>();
     private static Economy econ;
@@ -154,12 +158,24 @@ public final class NiuMaManager extends JavaPlugin {
         last_tick_time = nowtime;
     }
 
-    public static JsonArray getVipList(){
+    /**
+     * 定时调用并刷新各时效性强的数据
+     */
+    public static void getAutoRefreshData(){
         Gson gson = new Gson();
         httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
         Map<String, String> params = new HashMap<>();
         params.put("type", "viplist");
-        return gson.fromJson(hc.get(params), JsonArray.class);
+        vip_player = gson.fromJson(hc.get(params), JsonArray.class);
+        params.put("type","get_gem_data");
+        JsonObject js = gson.fromJson(hc.get(params), JsonObject.class);
+        gem_data = js.getAsJsonArray("Gem");
+        gemlegal = js.getAsJsonArray("gemlegal");
+
+        params.put("type","data");
+        shopData = gson.fromJson(hc.get(params), JsonArray.class);
+
+
     }
 
     public static boolean isVIP(Player player){
@@ -189,9 +205,18 @@ public final class NiuMaManager extends JavaPlugin {
         Gson gson = new Gson();
         httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
         Map<String, String> params = new HashMap<>();
-        params.put("name", p.getName());
         params.put("type", "player_info");
         params.put("name", NiuMaManager.getPlayerNiuMaServerAccount(p));
+        JsonObject res = gson.fromJson(hc.get(params),JsonObject.class);
+        return res;
+    }
+    public static JsonObject getPlayerInfo(long qq){
+        Gson gson = new Gson();
+        httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
+        Map<String, String> params = new HashMap<>();
+
+        params.put("type", "player_info");
+        params.put("name", qq+"");
         JsonObject res = gson.fromJson(hc.get(params),JsonObject.class);
         return res;
     }
@@ -240,7 +265,7 @@ public final class NiuMaManager extends JavaPlugin {
     public void setVauto(Player player , double adb){
         if (player.isGliding()) {
             // 玩家正在使用烟火火箭加速鞘翅飞行
-            player.sendMessage("已加速！");
+
 
             // 在这里可以修改飞行速度
             double nowv = player.getVelocity().length();
@@ -325,30 +350,30 @@ public final class NiuMaManager extends JavaPlugin {
         hc.get(params);
         last_postTime = now_time;
 
-        vip_player = getVipList();
+        getAutoRefreshData();
 
 
 //        Bukkit.getLogger().info(gson.toJson(params));
     }
     public static JsonArray getData(){
-        Gson gson = new Gson();
-        httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
-        Map<String, String> params = new HashMap<>();
-        params.put("type" , "data");
-        JsonArray js = gson.fromJson(hc.get(params),JsonArray.class);
-        return js;
+//        Gson gson = new Gson();
+//        httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");
+//        Map<String, String> params = new HashMap<>();
+//        params.put("type" , "data");
+//        JsonArray js = gson.fromJson(hc.get(params),JsonArray.class);
+//        return js;
+        return shopData;
     }
-    public static JsonArray getData(boolean canre){//仅获取可以回收的物品列表，此重载函数用于剥离不需要的元素
-        if(!canre){return null;}
-        JsonArray js = getData();
-        for(JsonElement ele : js){
-            JsonObject data = ele.getAsJsonObject();
-            if(!data.get("canre").getAsBoolean()){
-                js.remove(ele);
-            }
-        }
-        return js;
+
+    public static JsonArray getGemData(){
+        return gem_data;
     }
+
+    public static JsonArray getGemlegal(){return gemlegal;}
+
+
+
+
     public static double getTax(){//此处获取的tax是直接用于乘售价的部分，并不需要1-
         try {
             httpClient hc = new httpClient("http://139.224.250.35:666/mc/nm.php");

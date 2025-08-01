@@ -4,6 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.nbtapi.NBTCompound;
+import de.tr7zw.nbtapi.iface.ReadWriteItemNBT;
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 import mainFesht3.niuMaManager.NiuMaManager;
 import mainFesht3.niuMaManager.Utils.httpClient;
 import net.milkbowl.vault.economy.Economy;
@@ -18,10 +22,12 @@ import org.bukkit.inventory.ItemStack;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.checkerframework.checker.units.qual.C;
 
 
 public class shopProgress {
@@ -36,6 +42,23 @@ public class shopProgress {
         this.item_name = item_name;
         this.num = num;
     }
+    /**
+     * 替换背包中一个匹配的物品
+      */
+    public static void replaceItemsInInventory(Inventory inventory,
+                                               ItemStack targetItem,
+                                               ItemStack newItem) {
+        // 遍历背包所有槽位
+        for (int i = 0; i < inventory.getSize(); i++) {
+            ItemStack item = inventory.getItem(i);
+            // 比较物品是否匹配（考虑类型和数量）
+            if (item != null && item.isSimilar(targetItem)) {
+                inventory.setItem(i, newItem);
+                break;//只替换一次
+            }
+        }
+    }
+
     // 使用Spigot API的快捷方法统计特定物品数量
     public static int countItemsInInventory(Player player, Material material) {
         ItemStack itemToCount = new ItemStack(material);
@@ -77,6 +100,44 @@ public class shopProgress {
 //        player.sendMessage("你有"+remaining+"个余量");
         return remaining;
     }
+    // 计算物品栏中指定物品的堆叠数量（支持special物品）
+    public static int getItemNum(Player player, ItemStack item) {
+        Inventory inventory = player.getInventory();
+//        int maxStackSize = item.getMaxStackSize();
+        int remaining = 0;
+
+        // 1. 检查已存在的同类型物品的堆叠空间
+        for (ItemStack stack : inventory.getContents()) {
+            if (stack != null && stack.isSimilar(item)) {
+                remaining += stack.getAmount();
+            }
+        }
+//        player.sendMessage("你有"+remaining+"个item");
+        return remaining;
+    }
+
+    /**
+     *仅服务器装载了TaczMod可用
+     * @param name 完整名称，如minecraft:diamond
+     * @return 返回生成好的item对象s
+     */
+    @Deprecated
+    public static ItemStack getGunItem(String name , Map<String , Object> other){
+//        ItemStack item = new ItemStack(Material.getMaterial("modern_kinetic_gun".toUpperCase()));
+//        NBTItem nbt = new NBTItem(item);
+////        nbt.setString("id","tacz:modern_kinetic_gun");
+////        nbt.addCompound()
+//        nbt.addCompound("tag").setString("GunId",name);
+//        if(!other.isEmpty()){
+//
+//        }
+//        item = nbt.getItem();
+        ReadWriteNBT rwnbt = NBT.createNBTObject();
+        rwnbt.setString("id" ,"tacz:modern_kinetic_gun" );
+        rwnbt.getOrCreateCompound("tag").setString("GunId",name);
+        ItemStack item = NBT.itemStackFromNBT(rwnbt);
+        return item;
+    }
 
     public static ItemStack createSpecialItem(ItemStack item , JsonObject nbt_meta){
         Gson gson = new Gson();
@@ -89,6 +150,17 @@ public class shopProgress {
 
             item = nbt.getItem();
         }
+        if(nbt_meta.has("gem_list")){
+            NBTItem nbt = new NBTItem(item);
+            JsonArray gem_list = nbt_meta.getAsJsonArray("gem_list");
+            int[] gemList = new int[gem_list.size()];
+            for (int i = 0; i < gem_list.size(); i++) {
+                gemList[i] = gem_list.get(i).getAsInt();
+            }
+            nbt.setIntArray("gem_list", gemList);
+            item = nbt.getItem();
+        }
+
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(nbt_meta.get("displayName").getAsString());
 //
@@ -128,6 +200,7 @@ public class shopProgress {
         }
 
 
+
 //        // 方法 1：遍历转换（适合简单类型）
 //        List<String> stringList = new ArrayList<>();
 //        for (Object obj : rawList) {
@@ -146,7 +219,7 @@ public class shopProgress {
     public boolean buy(){
         //代号型返回（ 以后）
         //0为其他错误 1为成功 2为余额不足
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new ConcurrentHashMap<>();
         params.put("name" , NiuMaManager.getPlayerNiuMaServerAccount(player));
         params.put("type" , "buy");
         params.put("type2" , item_name);
@@ -191,6 +264,8 @@ public class shopProgress {
                     newitem = new ItemStack(ms, num);
                 }
                 int max = newitem.getMaxStackSize();
+                Bukkit.getLogger().info("max:"+max +"  num :"+num);
+
                 if (num > max) {
                     while (num / max > 0) {
                         newitem.setAmount(max);
@@ -200,6 +275,7 @@ public class shopProgress {
                     newitem.setAmount(num);
                     player.getInventory().addItem(newitem);
                 } else {
+                    newitem.setAmount(num);
                     player.getInventory().addItem(newitem);
                 }
             }
@@ -215,26 +291,63 @@ public class shopProgress {
 
 
     public boolean re(){
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new ConcurrentHashMap<>();
         params.put("name" , NiuMaManager.getPlayerNiuMaServerAccount(player));
         params.put("type" , "re");
         params.put("type2" , item_name);
+
+        ItemStack item = new ItemStack(Material.AIR);
+        // auto count item num !!!!!!!!!!!! === all
+        ItemStack raw_item ;
+        JsonArray allthingtype = NiuMaManager.getData();
+        try{
+            for (JsonElement ele : allthingtype) {
+                String item_name1 = ele.getAsJsonObject().get("item_name").getAsString();
+                Bukkit.getLogger().info("start match " + item_name1);
+                if (item_name1.equals(item_name)) {
+                    Bukkit.getLogger().info("matched " + item_name);
+                    JsonObject raw_data = ele.getAsJsonObject();
+                    if (raw_data.get("special").getAsBoolean()) {
+                        raw_item = new ItemStack(Material.valueOf(raw_data.get("item_type").getAsString().toUpperCase()));
+                        item = createSpecialItem(raw_item, raw_data.getAsJsonObject("meta"));
+                    } else {
+                        item = new ItemStack(Material.valueOf(raw_data.get("item_name").getAsString().toUpperCase()));
+                    }
+                    if(num == -1) {
+                        num = getItemNum(player, item);
+                    }
+                    Bukkit.getLogger().info("num" + num);
+                    break;
+                }
+            }
+        }catch (Exception e){
+//            item = new ItemStack(Material.AIR);
+            Bukkit.getLogger().info(e+"");
+        }
+
         params.put("type3" , ""+num);
-        Material item_material = Material.valueOf(item_name.toUpperCase());
+//        Material item_material = Material.valueOf(item_name.toUpperCase());
 //        ItemStack mainhand = player.getInventory().getItemInMainHand();
 //
 //        player.sendMessage(""+countItemsInInventory(player , mainhand.getType()));
+//        if(item.getType() == Material.AIR){
+//            player.sendMessage("§4订单交易失败\n未找到你想交易的物品！");
+//            return false;
+//        }
 
-
-        int have = countItemsInInventory(player, item_material);
+        Bukkit.getLogger().info("reing");
+        int have = getItemNum(player, item);
         if(have < num){
             player.sendMessage("§4订单交易失败\n你的物品栏中并没有足够的物品可以回收！");
             return false;
         }else {
             String res = hc.get(params);
             JsonObject obj = gson.fromJson(res, JsonObject.class);
+
             if (obj.get("result").getAsBoolean()) {
-                player.getInventory().removeItem(new ItemStack(item_material, obj.get("ic").getAsInt()));
+                item.setAmount(obj.get("ic").getAsInt());
+
+                player.getInventory().removeItem(item);//new ItemStack(item_material, obj.get("ic").getAsInt()));
                 player.sendMessage("§a订单交易成功！\n" + obj.get("reason").getAsString());
                 return true;
             } else {

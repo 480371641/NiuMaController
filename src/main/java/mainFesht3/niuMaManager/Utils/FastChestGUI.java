@@ -10,9 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FastChestGUI {
 
-    private final String title;  // 商店标题
-    private final int size;      // 商店界面大小 (9的倍数)
-    private final Map<Integer, ItemStack> items;  // 商店物品列表
+    private String title;  // 商店标题
+    private  int size;      // 商店界面大小 (9的倍数)
+    private  Map<Integer, ItemStack> items;  // 商店物品列表
     private  Inventory gui ;
 
 //    public FastChestGUI(String title, int rows) {
@@ -36,6 +36,11 @@ public class FastChestGUI {
         this.items = new ConcurrentHashMap<>();
 //        createGUI();
     }
+
+    public void setTtile(String title){
+        this.title = title;
+    }
+    public int getMaxSize(){return 54;}
 
     // 添加物品到商店
     public void addItem(int slot, ItemStack item) {
