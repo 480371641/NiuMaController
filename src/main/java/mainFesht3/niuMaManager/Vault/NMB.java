@@ -162,6 +162,21 @@ public class NMB implements CommandExecutor {
 //                }
 //            }
 
+            if(args.length == 1){
+                Player player = (Player) sender;
+                if(args[0].equals("gem")){
+                    try {
+                        ItemStack mainHandItem = player.getInventory().getItemInMainHand();
+                        equipmentGUI eg = new equipmentGUI(mainHandItem);
+                        eg.createGUI();
+                        eg.openTo(player);
+                    }catch (Exception e){
+                        Bukkit.getLogger().info(e+"");
+                    }
+                }
+            }
+
+
             if(args.length == 0){
                 Player player = (Player) sender;
                 Economy econ = NiuMaManager.getEconomy();

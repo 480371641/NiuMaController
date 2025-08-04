@@ -93,7 +93,7 @@ public class equipmentEventHandler implements Listener {
                     }
                     player.setHealth( newHealth );
 
-                    player.sendMessage("§6§l欲火重生, 恢复已损生命值" + (fireRecover*100)+"%");
+                    player.sendMessage("§6§l浴火重生, 恢复已损生命值" + (fireRecover*100)+"%");
 //                    event.setCancelled(true);
                 }
             }
@@ -216,6 +216,9 @@ public class equipmentEventHandler implements Listener {
         if(! (inventory.getHolder() instanceof gemInstaller) ){
             return;
         }
+
+        event.setCancelled(true);//防止盗用
+
 
         NBTItem nbt = new NBTItem(clickedItem);
 

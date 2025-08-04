@@ -57,7 +57,7 @@ public class equipmentGUI {
             JsonObject gemShopData = equipmentAPI.getGemShopData(gem_id);
             gui.addItem(i , shopProgress.createSpecialItem( new ItemStack(Material.valueOf(gemShopData.get("item_type").getAsString().toUpperCase())),gemShopData.getAsJsonObject("meta")));
 
-                    gem_id ++;
+            gem_id ++;
         }
 
         gui.createGUI(new gemInstaller());

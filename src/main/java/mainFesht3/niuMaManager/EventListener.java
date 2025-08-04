@@ -243,7 +243,7 @@ public class EventListener implements Listener {
     @EventHandler
     public void onFireworkLaunch(ProjectileLaunchEvent event) {
         // 检查发射的实体是否为烟花火箭
-        if (event.getEntityType() == EntityType.FIREWORK) {
+        if (event.getEntityType() == EntityType.FIREWORK ) {
             Entity firework = event.getEntity();
             Player player = (Player) event.getEntity().getShooter();
             ItemStack chestplate = player.getInventory().getChestplate();

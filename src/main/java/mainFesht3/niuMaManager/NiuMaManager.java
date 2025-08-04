@@ -279,7 +279,7 @@ public final class NiuMaManager extends JavaPlugin {
                         true,                    // 显示粒子
                         true                     // 显示图标
                 );
-                p.setFlying(false);
+                p.setGliding(false);
                 p.setSprinting(false);
                 p.removePotionEffect(PotionEffectType.INVISIBILITY);
                 p.addPotionEffect(slowEffect);
