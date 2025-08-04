@@ -21,6 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.milkbowl.vault.economy.Economy; // 此时应无报错
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
@@ -55,7 +57,7 @@ public final class NiuMaManager extends JavaPlugin {
             return 0.0;
         }
     }
-    public double getTime(){
+    public static double getTime(){
         return  (double) Instant.now().toEpochMilli() /1000;
         //        System.out.println("毫秒级时间戳: " + timestampMillis);
     }
@@ -246,7 +248,12 @@ public final class NiuMaManager extends JavaPlugin {
                 Location footpos = p.getLocation();
 
                 World wd = footpos.getWorld();
-                wd.spawnParticle(Particle.SOUL , p.getEyeLocation(),1);
+                wd.spawnParticle(Particle.FLAME , p.getEyeLocation(),
+                        1 ,
+                        0.01,
+                        0.01,
+                        0.01,
+                        0.01);
                 wd.spawnParticle(Particle.GLOW ,
                         footpos,//new Location(wd , footpos.getX() , footpos.getY()+1.6, footpos.getZ()) ,
                         10 ,
@@ -254,7 +261,32 @@ public final class NiuMaManager extends JavaPlugin {
                         1.1,
                         0.1,
                         3);
-                p.sendTitle("" , ChatColor.RED+"服务器不建议您使用隐身哦！",0,10,0);
+                p.sendTitle(ChatColor.RED+"服务器禁用隐身!" , ChatColor.RED+"请卸下隐身斗篷等物品！",0,10,0);
+
+                PotionEffect slowEffect = new PotionEffect(
+                        PotionEffectType.SLOW,  // 效果类型
+                        20,                     // 持续20刻（1秒）
+                        20,                       // II级（amplifier=1）
+                        true,                    // 环境效果
+                        true,                    // 显示粒子
+                        true                     // 显示图标
+                );
+                PotionEffect jumplessEffect = new PotionEffect(
+                        PotionEffectType.JUMP,  // 效果类型
+                        20,                     // 持续20刻（1秒）
+                        249,                       // 级
+                        true,                    // 环境效果
+                        true,                    // 显示粒子
+                        true                     // 显示图标
+                );
+                p.setFlying(false);
+                p.setSprinting(false);
+                p.removePotionEffect(PotionEffectType.INVISIBILITY);
+                p.addPotionEffect(slowEffect);
+                p.addPotionEffect(jumplessEffect);
+//                for(Player otherp : olp){
+//                    otherp.showPlayer(p);
+//                }
 //                p.setInvisible(false);
 //                getLogger().info(p.getName() + " try to be invisible !");
             }

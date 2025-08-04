@@ -105,7 +105,13 @@ public class NMB implements CommandExecutor {
 //                                Bukkit.getLogger().info("add Gem result" + ep.addGem(gem_id));
                                 shopProgress.replaceItemsInInventory(player.getInventory(), mainHandItem, ep.getFinalItem());
                                 player.updateInventory();
+                                player.sendMessage(ChatColor.GREEN+gemShopData.get("item_name").getAsString()+"宝石已装配，装备获得了特殊力量");
+
+                            }else{
+                                player.sendMessage(ChatColor.DARK_RED+"装配失败！你的装备可能已装满宝石（最多3个）");
                             }
+                        }else {
+                            player.sendMessage(ChatColor.DARK_RED+"装配失败！你的背包可能没有此宝石，如有请不要放在副手哦！");
                         }
 
 //                        Bukkit.getLogger().info("add Gem result" + ep.addGem(gem_id) );
@@ -136,6 +142,9 @@ public class NMB implements CommandExecutor {
 
                                 shopProgress.replaceItemsInInventory(player.getInventory(), mainHandItem, ep.getFinalItem());
                                 player.updateInventory();
+                                player.sendMessage(ChatColor.GREEN+gemShopData.get("item_name").getAsString()+"宝石已褪下，装备的特殊力量已经消失");
+                            }else{
+                                player.sendMessage(ChatColor.DARK_RED+"卸载失败！可能是你的装备没有此宝石");
                             }
                         }else {
                             player.sendMessage(ChatColor.DARK_RED+"你的背包空间不够！不足以容纳褪下的强化宝石");

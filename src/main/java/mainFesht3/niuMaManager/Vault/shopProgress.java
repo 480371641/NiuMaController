@@ -87,7 +87,7 @@ public class shopProgress {
 
         // 1. 检查已存在的同类型物品的堆叠空间
         for (ItemStack stack : inventory.getContents()) {
-            if (stack != null && stack.isSimilar(item)) {
+            if (stack != null && stack.isSimilar(item) && (!player.getInventory().getItemInOffHand().isSimilar(item))) {
                 remaining += maxStackSize - stack.getAmount();
             }
         }
@@ -108,7 +108,7 @@ public class shopProgress {
 
         // 1. 检查已存在的同类型物品的堆叠空间
         for (ItemStack stack : inventory.getContents()) {
-            if (stack != null && stack.isSimilar(item)) {
+            if (stack != null && stack.isSimilar(item) && (!player.getInventory().getItemInOffHand().isSimilar(item)) ) {
                 remaining += stack.getAmount();
             }
         }

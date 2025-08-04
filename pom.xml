@@ -114,6 +114,12 @@
             <layout>default</layout>
         </repository>
 
+        <!-- Arclight 官方仓库 -->
+        <repository>
+            <id>arclight-releases</id>
+            <url>https://maven.izzel.io/releases</url>
+        </repository>
+
 <!--        <repository>-->
 <!--            <id>mohistmc</id>-->
 <!--            <url>https://maven.mohistmc.com/</url>-->
@@ -142,12 +148,7 @@
             <scope>provided</scope>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.mohistmc</groupId>-->
-<!--            <artifactId>mohistdev</artifactId>-->
-<!--            <version>1.20.1</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
+
 
         <dependency>
             <groupId>com.google.code.gson</groupId>

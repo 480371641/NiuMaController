@@ -23,11 +23,12 @@ public class Test implements CommandExecutor {
 
         player.getInventory().addItem(shopProgress.getGunItem("tacz:vector45",new HashMap<>()));
         NBTItem nbt = new NBTItem(hd);
-        player.sendMessage(String.valueOf(hd.getType()));
-        player.sendMessage(nbt.toString());
-        Bukkit.getLogger().info(ChatColor.GOLD+nbt.toString());
-        Bukkit.getLogger().info(ChatColor.GREEN+hd.getType().toString());
-
+        if(player.isOp()) {
+            player.sendMessage(String.valueOf(hd.getType()));
+            player.sendMessage(nbt.toString());
+            Bukkit.getLogger().info(ChatColor.GOLD + nbt.toString());
+            Bukkit.getLogger().info(ChatColor.GREEN + hd.getType().toString());
+        }
         return true;
     }
 }

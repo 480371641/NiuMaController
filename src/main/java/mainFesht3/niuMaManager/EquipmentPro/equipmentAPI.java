@@ -219,6 +219,32 @@ public class equipmentAPI {
     }
 
 
+
+    public double getSpecialValue(String dataKey){
+        double doubleValue = 0;
+        if(!isGemSpecial()){return doubleValue;}
+
+
+        List<Integer> gem_list = getGemList();
+        for(int gem_id : gem_list){
+            JsonObject gem_data = getGemData(gem_id);
+            JsonObject gem_special_data = gem_data.getAsJsonObject("data");//宝石专有属性数据
+            if(gem_special_data.has( dataKey )) {
+                if(gem_data.get("only").getAsBoolean()){
+                    //该宝石的属性唯一，覆盖所有数据并停止读取宝石列表
+                    doubleValue = gem_special_data.get(dataKey).getAsDouble();
+                    break;
+                }else {
+                    doubleValue += gem_special_data.get(dataKey).getAsDouble();
+                }
+            }
+
+
+        }
+
+        return doubleValue;
+    }
+
     /**
      *只有GemSpecial物品可以使用此函数！
      * 并不参与Lore的添加与检测，请使用checkAndFixLoreHealth()
@@ -252,20 +278,22 @@ public class equipmentAPI {
         if(isGem()){return false;}
         if(!equipmentEnable.getEquipmentLegal(item)){return false;}
         List<Integer> gemList = getGemList();
-        Bukkit.getLogger().info("gem list length : "+gemList.size());
+//        Bukkit.getLogger().info("gem list length : "+gemList.size());
         if(gemList.size() > 0){
-            gemList.remove(Integer.valueOf(gem_id));//remove 只会删除一次
-            int[] gem_list = new int[gemList.size()];
-            for (int i = 0; i < gemList.size() ; i++) {
-                gem_list[i] = gemList.get(i);
-            }
+            if(gemList.contains(gem_id)) {
+                gemList.remove(Integer.valueOf(gem_id));//remove 只会删除一次
+                int[] gem_list = new int[gemList.size()];
+                for (int i = 0; i < gemList.size(); i++) {
+                    gem_list[i] = gemList.get(i);
+                }
 
-            if(gem_list.length == 0){
-                nbt.removeKey("gem_list");
-            }else {
-                nbt.setIntArray("gem_list", gem_list);
+                if (gem_list.length == 0) {
+                    nbt.removeKey("gem_list");
+                } else {
+                    nbt.setIntArray("gem_list", gem_list);
+                }
+                return true;
             }
-            return true;
         }
 
         //do
@@ -282,7 +310,6 @@ public class equipmentAPI {
         checkAndFixLoreHealth();
 
 
-
         return item;
     }
 
@@ -296,28 +323,7 @@ public class equipmentAPI {
      * @return
      */
     public double getFallDamageResisdent(){
-        double fallDamage = 0;
-        if(!isGemSpecial()){return fallDamage;}
-
-
-        List<Integer> gem_list = getGemList();
-        for(int gem_id : gem_list){
-            JsonObject gem_data = getGemData(gem_id);
-            JsonObject gem_special_data = gem_data.getAsJsonObject("data");//宝石专有属性数据
-            if(gem_special_data.has("fallDamage")) {
-                if(gem_data.get("only").getAsBoolean()){
-                    //该宝石的属性唯一，覆盖所有数据并停止读取宝石列表
-                    fallDamage = gem_special_data.get("fallDamage").getAsDouble();
-                    break;
-                }else {
-                    fallDamage += gem_special_data.get("fallDamage").getAsDouble();
-                }
-            }
-
-
-        }
-
-        return fallDamage;
+        return getSpecialValue("fallDamage");
     }
 
     /**
@@ -325,28 +331,7 @@ public class equipmentAPI {
      * @return
      */
     public double getAntiFirePercentage(){
-        double antiFire = 0;
-        if(!isGemSpecial()){return antiFire;}
-
-
-        List<Integer> gem_list = getGemList();
-        for(int gem_id : gem_list){
-            JsonObject gem_data = getGemData(gem_id);
-            JsonObject gem_special_data = gem_data.getAsJsonObject("data");//宝石专有属性数据
-            if(gem_special_data.has("antiFire")) {
-                if(gem_data.get("only").getAsBoolean()){
-                    //该宝石的属性唯一，覆盖所有数据并停止读取宝石列表
-                    antiFire = gem_special_data.get("antiFire").getAsDouble();
-                    break;
-                }else {
-                    antiFire += gem_special_data.get("antiFire").getAsDouble();
-                }
-            }
-
-
-        }
-
-        return antiFire;
+        return getSpecialValue("antiFire");
     }
 
     /**
@@ -354,30 +339,9 @@ public class equipmentAPI {
      * @return
      */
     public double getFireDamageResisdent(){
-        double fireDamage = 0;
-        if(!isGemSpecial()){return fireDamage;}
-
-
-        List<Integer> gem_list = getGemList();
-        for(int gem_id : gem_list){
-            JsonObject gem_data = getGemData(gem_id);
-            JsonObject gem_special_data = gem_data.getAsJsonObject("data");//宝石专有属性数据
-            if(gem_special_data.has("fireDamage")) {
-                if(gem_data.get("only").getAsBoolean()){
-                    //该宝石的属性唯一，覆盖所有数据并停止读取宝石列表
-                    fireDamage = gem_special_data.get("fireDamage").getAsDouble();
-                    break;
-                }else {
-                    //该宝石的属性不唯一，可以叠加
-                    fireDamage += gem_special_data.get("fireDamage").getAsDouble();
-                }
-
-            }
-
-
-        }
-
-        return fireDamage;
+        return getSpecialValue("fireDamage");
     }
+
+
 
 }
