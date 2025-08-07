@@ -5,10 +5,7 @@ import de.tr7zw.nbtapi.NBTItem;
 import mainFesht3.niuMaManager.EquipmentPro.signs.gemInstaller;
 import mainFesht3.niuMaManager.NiuMaManager;
 import mainFesht3.niuMaManager.Utils.RandomUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NetherWartsState;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -49,12 +46,40 @@ public class equipmentEventHandler implements Listener {
     public void onHurt(EntityDamageEvent event){
         try {
 //            Bukkit.getLogger().info("entity fall");
+            if (!(event.getEntity() instanceof Player)) return;
 
             Player player = (Player) event.getEntity();
 
-//            Bukkit.getLogger().info("player fall");
 
 //            Bukkit.getLogger().info(event.getCause().toString());
+
+            if(event.getCause() == EntityDamageEvent.DamageCause.CUSTOM){
+                return;
+            }
+
+            ItemStack chestplate = player.getInventory().getChestplate();
+
+
+            // 检查物品是否为鞘翅
+            if (chestplate != null && chestplate.getType() == Material.ELYTRA) {
+                NBTItem nbt = new NBTItem(chestplate);
+                if( nbt.hasTag("special_type" ) ) {
+                    if(nbt.getString("special_type").equals("elytra")) {
+                        if (event.getCause() == EntityDamageEvent.DamageCause.FALL || event.getCause() == EntityDamageEvent.DamageCause.FLY_INTO_WALL) {
+                            event.setDamage(event.getDamage() * 0.4);
+                            player.sendTitle("", ChatColor.DARK_BLUE + "自由之翼技能触发：摔落伤害减免60%", 0, 20, 0);
+                            player.sendMessage("已减免" + (Math.round(event.getDamage() * 0.8 * 100) / 100) + "的伤害");
+                        }
+                    }
+                }
+            }
+
+
+
+//            Bukkit.getLogger().info("player fall");
+//
+
+
             ItemStack[] in = player.getInventory().getArmorContents();
             if(event.getCause() == EntityDamageEvent.DamageCause.FALL || event.getCause() == EntityDamageEvent.DamageCause.FLY_INTO_WALL ) {
                 double fallDamage = 0;
@@ -133,6 +158,7 @@ public class equipmentEventHandler implements Listener {
     @EventHandler
     public void onBulletHitHurt__(EntityDamageByEntityEvent event){
         try {
+
             Entity bullet = event.getDamager();
             Entity entity = event.getEntity();
 //            Player player = (Player) attacker;
@@ -144,6 +170,7 @@ public class equipmentEventHandler implements Listener {
 
             if((bullet.getType()+"").equals("TACZ_BULLET") ){
                 Player shooter = Bukkit.getPlayer(bulletnbt.getUUID("Owner"));
+                Player beShooter = (Player) entity;
 
                 if(shooter.isInvisible()&&!shooter.isOp()){
                     //隐身者禁止枪击其他实体！！！
@@ -151,11 +178,11 @@ public class equipmentEventHandler implements Listener {
                     shooter.kickPlayer("服务器明令禁止使用隐身，你不仅不解除还攻击了其他实体！已被踢出服务器");
                 }
 
-                ItemStack[] in = shooter.getInventory().getArmorContents();
+                ItemStack[] in = beShooter.getInventory().getArmorContents();
                 double bulletDamage = 0;
-                bulletDamage = getSpecialValueFromArmors("bulletDamage" , in);
+//                bulletDamage = getSpecialValueFromArmors("bulletDamage" , in);
 
-                bulletDamage = getSpecialValueFromArmors("fireRecover" , in);
+                bulletDamage = getSpecialValueFromArmors("bulletDamage" , in);
                 if(bulletDamage!=0) {
                     double finalDamage =  event.getDamage()*(1+bulletDamage);
                     if(finalDamage <= 0){
@@ -163,7 +190,7 @@ public class equipmentEventHandler implements Listener {
                     }
                     event.setDamage( finalDamage );
 
-                    shooter.sendMessage("§7§l子弹伤害减免" + ((int)bulletDamage*100) + "%");
+                    beShooter.sendMessage("§7§l子弹伤害减免" + ((int)(bulletDamage*100)) + "%");
 //                    event.setCancelled(true);
                 }
 
@@ -172,8 +199,6 @@ public class equipmentEventHandler implements Listener {
 
 
 //                shooter.sendMessage("You shoot at "+entity.getName());
-
-
 
             }
 

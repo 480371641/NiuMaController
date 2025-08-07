@@ -14,13 +14,12 @@ import org.bukkit.entity.Player;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
-import org.bukkit.event.player.PlayerEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.*;
 
 import java.net.PortUnreachableException;
 import java.net.http.HttpConnectTimeoutException;
@@ -29,7 +28,6 @@ import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
@@ -85,28 +83,47 @@ public class EventListener implements Listener {
 ////        Bukkit.getLogger().info(s.getShooter().getName());
 ////        event.getPlayer().sendMessage(event.getEventName());
 //    }
+//    @EventHandler
+//    public void onFallDamage(EntityDamageEvent event){
+//        try {
+//            Player player = (Player) event.getEntity();
+//            ItemStack chestplate = player.getInventory().getChestplate();
+//
+//            NBTItem nbt = new NBTItem(chestplate);
+//            // 检查物品是否为鞘翅
+//            if (chestplate != null && chestplate.getType() == Material.ELYTRA && Objects.equals(nbt.getString("special_type"), "elytra")) {
+//                if(event.getCause() == EntityDamageEvent.DamageCause.FALL || event.getCause() == EntityDamageEvent.DamageCause.FLY_INTO_WALL ) {
+//
+//                    event.setDamage( event.getDamage()*0.4);
+//                    player.sendTitle("", ChatColor.DARK_BLUE+"自由之翼技能触发：摔落伤害减免60%" , 0 , 20 , 0);
+//                    player.sendMessage("已减免"+(Math.round(event.getDamage()*0.8*100)/100)+"的伤害" );
+//                }
+//            }
+//            }catch (Exception e){
+//            //pass
+//        }
+//    }
+
     @EventHandler
-    public void onFallDamage(EntityDamageEvent event){
-        try {
-            Player player = (Player) event.getEntity();
-            ItemStack chestplate = player.getInventory().getChestplate();
+    public void placeBlock(BlockPlaceEvent event){
+        if(event.getBlock().getType().toString().toUpperCase().indexOf("SIGN") != -1){
 
-            NBTItem nbt = new NBTItem(chestplate);
-            // 检查物品是否为鞘翅
-            if (chestplate != null && chestplate.getType() == Material.ELYTRA && Objects.equals(nbt.getString("special_type"), "elytra")) {
-                if(event.getCause() == EntityDamageEvent.DamageCause.FALL || event.getCause() == EntityDamageEvent.DamageCause.FLY_INTO_WALL ) {
-
-                    event.setDamage( event.getDamage()*0.4);
-                    player.sendTitle("", ChatColor.DARK_BLUE+"自由之翼技能触发：摔落伤害减免60%" , 0 , 20 , 0);
-                    player.sendMessage("已减免"+(Math.round(event.getDamage()*0.8*100)/100)+"的伤害" );
-                }
+            //SIGN
+            //"TWILIGHTFOREST"
+            if(event.getBlock().getType().toString().toUpperCase().indexOf("TWILIGHTFOREST") != -1||event.getBlock().getType().toString().toUpperCase().indexOf("AETHER") != -1){
+                event.setCancelled(true);
             }
-            }catch (Exception e){
-            //pass
         }
     }
 
-
+    @EventHandler
+    public void banMagicBeans(PlayerInteractEvent event){
+        if(event.hasItem()){
+            if(event.getItem().getType().toString().equals("TWILIGHTFOREST_MAGIC_BEANS")){
+                event.setCancelled(true);
+            }
+        }
+    }
 
     @EventHandler
     public void onEntityHurtAndBanNMGOLD(EntityDamageByEntityEvent event){
@@ -300,7 +317,9 @@ public class EventListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event){
 //        Player p = event.getPlayer();
+        Bukkit.getLogger().info(event.getQuitMessage());
         event.setQuitMessage("有杂鱼偷偷溜走了喔......");
+
     }
 
 }

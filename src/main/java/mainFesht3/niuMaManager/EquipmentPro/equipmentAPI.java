@@ -201,7 +201,7 @@ public class equipmentAPI {
         if(isGem()){return null;}
         int[] gem_list = nbt.getIntArray("gem_list");
         List<Integer> gemList = new ArrayList<>();
-        Bukkit.getLogger().info("gem list get length : " + gem_list.length);
+//        Bukkit.getLogger().info("gem list get length : " + gem_list.length);
 
         for(int gem_id : gem_list){
             gemList.add(gem_id);
